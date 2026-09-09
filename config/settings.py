@@ -38,6 +38,12 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": f"file:{GWR_SOURCE_DB}?mode=ro",
         "OPTIONS": {"uri": True, "init_command": "PRAGMA query_only=1;"},
+        # gwr is a standalone read-only source DB with no FK relationship to "default"
+        # (allow_migrate already forbids migrating it). Without this, Django's test
+        # runner assumes every non-default alias depends on "default" and raises
+        # "Circular dependency in TEST[DEPENDENCIES]" when a test requests only
+        # databases=["gwr"] without "default".
+        "TEST": {"DEPENDENCIES": []},
     },
 }
 DATABASE_ROUTERS = ["config.db_router.GwrRouter"]
