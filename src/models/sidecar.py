@@ -14,6 +14,10 @@ class MapPoint(models.Model):
 
     class Meta:
         app_label = "src"
+        # Composite index for the map's viewport bbox query
+        # (lat range-scanned, lon narrowed) — without it, MapService.points_in_bbox
+        # full-scans all ~3.3M rows on every map pan/zoom at real scale.
+        indexes: ClassVar = [models.Index(fields=["lat", "lon"])]
 
 
 class StatsCache(models.Model):
