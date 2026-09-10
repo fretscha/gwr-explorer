@@ -5,6 +5,16 @@ from src.models import Building, Dwelling, Entrance
 from src.services.facets import FacetService
 from src.services.labels import LabelService
 from src.services.search import SearchService
+from src.services.stats import StatsService
+
+_DASHBOARD_METRICS = [
+    ("buildings_by_canton", "Gebäude pro Kanton"),
+    ("buildings_by_decade", "Gebäude nach Baujahrzehnt"),
+    ("buildings_by_category", "Gebäudekategorie"),
+    ("heating_energy", "Energie-/Wärmequelle Heizung"),
+    ("dwellings_by_rooms", "Wohnungen nach Zimmerzahl"),
+    ("building_status", "Gebäudestatus"),
+]
 
 # (column, coded-field name or None for a raw/free-text value)
 _BUILDING_FIELDS = [
@@ -94,3 +104,9 @@ def explorer(request):
 def explorer_results(request):
     data = FacetService().query(**_facet_params(request))
     return render(request, "partials/explorer_results.html", data)
+
+
+def stats(request):
+    svc = StatsService()
+    charts = [{"metric": m, "title": t, "rows": svc.metric(m)} for m, t in _DASHBOARD_METRICS]
+    return render(request, "stats.html", {"charts": charts})

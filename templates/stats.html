@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Statistik{% endblock %}
+{% block content %}
+<h1>Statistik</h1>
+{% for c in charts %}
+<section>
+  <h2>{{ c.title }}</h2>
+  <canvas data-metric="{{ c.metric }}" width="600" height="300" role="img" aria-label="{{ c.title }}"></canvas>
+  <noscript>JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur Verfügung.</noscript>
+  <details>
+    <summary>Daten als Tabelle</summary>
+    <table>
+      <thead><tr><th>Kategorie</th><th>Anzahl</th></tr></thead>
+      <tbody>
+        {% for r in c.rows %}<tr><td>{{ r.label }}</td><td>{{ r.value }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </details>
+</section>
+{% endfor %}
+<script src="{% static 'vendor/chart.min.js' %}"></script>
+<script src="{% static 'js/dashboards.js' %}"></script>
+{% endblock %}
