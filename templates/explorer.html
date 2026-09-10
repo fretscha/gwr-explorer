@@ -1,25 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Explorer{% endblock %}
 {% block content %}
-<h1>Explorer</h1>
-<form id="ex-filter-form" hx-get="/explorer/ergebnisse/" hx-target="#ex-results" hx-trigger="change, submit">
-  <label title="GDEKT">Kanton
-    <select name="canton"><option value="">alle</option>
+<h1 class="mb-4 text-2xl font-semibold text-slate-900">Explorer</h1>
+
+<form id="ex-filter-form" hx-get="/explorer/ergebnisse/" hx-target="#ex-results" hx-trigger="change, submit"
+      class="mb-6 grid grid-cols-1 gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:grid-cols-2 lg:grid-cols-5">
+  <label title="GDEKT" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
+    Kanton
+    <select name="canton" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
+      <option value="">alle</option>
       {% for o in facets.canton %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
     </select>
   </label>
-  <label title="GKAT">Gebäudekategorie
-    <select name="gkat"><option value="">alle</option>
+  <label title="GKAT" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
+    Gebäudekategorie
+    <select name="gkat" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
+      <option value="">alle</option>
       {% for o in facets.gkat %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
     </select>
   </label>
-  <label title="GENH1">Heizungsart
-    <select name="genh1"><option value="">alle</option>
+  <label title="GENH1" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
+    Heizungsart
+    <select name="genh1" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
+      <option value="">alle</option>
       {% for o in facets.genh1 %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
     </select>
   </label>
-  <label title="GBAUJ">Baujahr von <input type="number" name="year_from" /></label>
-  <label title="GBAUJ">bis <input type="number" name="year_to" /></label>
+  <label title="GBAUJ" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
+    Baujahr von
+    <input type="number" name="year_from" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" />
+  </label>
+  <label title="GBAUJ" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
+    bis
+    <input type="number" name="year_to" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" />
+  </label>
 </form>
+
 <div id="ex-results">{% include "partials/explorer_results.html" %}</div>
 {% endblock %}

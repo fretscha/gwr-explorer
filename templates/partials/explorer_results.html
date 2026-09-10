@@ -1,18 +1,38 @@
-<p>{{ count }} Gebäude</p>
-<table>
-  <tr><th title="EGID">EGID</th><th title="GGDENAME">Gemeindename</th><th title="GBAUJ">Baujahr des Gebäudes</th></tr>
-  {% for b in results %}
-  <tr><td><a href="/gebaeude/{{ b.EGID }}/">{{ b.EGID }}</a></td><td>{{ b.GGDENAME }}</td><td>{{ b.GBAUJ }}</td></tr>
-  {% endfor %}
-</table>
-<nav>
+<p class="mb-2 text-sm text-slate-600">{{ count }} Gebäude</p>
+<div class="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-50">
+      <tr>
+        <th title="EGID" class="px-4 py-2 text-left font-medium text-slate-600">EGID</th>
+        <th title="GGDENAME" class="px-4 py-2 text-left font-medium text-slate-600">Gemeindename</th>
+        <th title="GBAUJ" class="px-4 py-2 text-left font-medium text-slate-600">Baujahr des Gebäudes</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for b in results %}
+      <tr class="hover:bg-slate-50">
+        <td class="px-4 py-2"><a href="/gebaeude/{{ b.EGID }}/" class="text-slate-900 hover:underline">{{ b.EGID }}</a></td>
+        <td class="px-4 py-2">{{ b.GGDENAME }}</td>
+        <td class="px-4 py-2">{{ b.GBAUJ }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<nav class="mt-4 flex items-center justify-between text-sm">
   {% if has_previous %}
   <a href="#" hx-get="/explorer/ergebnisse/?page={{ previous_page }}" hx-include="#ex-filter-form"
-     hx-target="#ex-results">Zurück</a>
+     hx-target="#ex-results"
+     class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">Zurück</a>
+  {% else %}
+  <span></span>
   {% endif %}
-  <span>Seite {{ page }}</span>
+  <span class="text-slate-600">Seite {{ page }}</span>
   {% if has_next %}
   <a href="#" hx-get="/explorer/ergebnisse/?page={{ next_page }}" hx-include="#ex-filter-form"
-     hx-target="#ex-results">Weiter</a>
+     hx-target="#ex-results"
+     class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">Weiter</a>
+  {% else %}
+  <span></span>
   {% endif %}
 </nav>

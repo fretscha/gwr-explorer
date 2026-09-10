@@ -1,0 +1,9 @@
+/*
+ * Tailwind entry point. The downloaded standalone CLI is Tailwind v4, whose
+ * content-detection pipeline only runs behind the `@import "tailwindcss";`
+ * entry point (the legacy `@tailwind base/components/utilities` triad is
+ * still parsed for backward compatibility but does not honor `@source`
+ * scanning) — see README.md for the exact build command.
+ */
+@import "tailwindcss";
+@source "../../templates/**/*.html";

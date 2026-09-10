@@ -7,3 +7,6 @@ tests/fixtures/*.sqlite-journal
 db.sqlite3
 .env
 node_modules/
+
+# Tailwind standalone CLI binary (downloaded per README, not committed)
+/tailwindcss
