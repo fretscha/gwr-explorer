@@ -2,6 +2,7 @@ from django.http import Http404
 from django.shortcuts import render
 
 from src.models import Building, Dwelling, Entrance
+from src.services.facets import FacetService
 from src.services.labels import LabelService
 from src.services.search import SearchService
 
@@ -65,3 +66,31 @@ def building_detail(request, egid: int):
             "dwelling_rows": dwelling_rows,
         },
     )
+
+
+def _facet_params(request):
+    """Parse and validate facet query params from the request's GET dict."""
+    g = request.GET
+
+    def _int(name):
+        v = g.get(name)
+        return int(v) if v and v.isdigit() else None
+
+    return {
+        "canton": g.get("canton") or None,
+        "gkat": _int("gkat"),
+        "genh1": _int("genh1"),
+        "year_from": _int("year_from"),
+        "year_to": _int("year_to"),
+        "page": _int("page") or 1,
+    }
+
+
+def explorer(request):
+    data = FacetService().query(**_facet_params(request))
+    return render(request, "explorer.html", data)
+
+
+def explorer_results(request):
+    data = FacetService().query(**_facet_params(request))
+    return render(request, "partials/explorer_results.html", data)

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Explorer{% endblock %}
+{% block content %}
+<h1>Explorer</h1>
+<form id="ex-filter-form" hx-get="/explorer/ergebnisse/" hx-target="#ex-results" hx-trigger="change, submit">
+  <label title="GDEKT">Kanton
+    <select name="canton"><option value="">alle</option>
+      {% for o in facets.canton %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
+    </select>
+  </label>
+  <label title="GKAT">Gebäudekategorie
+    <select name="gkat"><option value="">alle</option>
+      {% for o in facets.gkat %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
+    </select>
+  </label>
+  <label title="GENH1">Heizungsart
+    <select name="genh1"><option value="">alle</option>
+      {% for o in facets.genh1 %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
+    </select>
+  </label>
+  <label title="GBAUJ">Baujahr von <input type="number" name="year_from" /></label>
+  <label title="GBAUJ">bis <input type="number" name="year_to" /></label>
+</form>
+<div id="ex-results">{% include "partials/explorer_results.html" %}</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+<p>{{ count }} Gebäude</p>
+<table>
+  <tr><th title="EGID">EGID</th><th title="GGDENAME">Gemeindename</th><th title="GBAUJ">Baujahr des Gebäudes</th></tr>
+  {% for b in results %}
+  <tr><td><a href="/gebaeude/{{ b.EGID }}/">{{ b.EGID }}</a></td><td>{{ b.GGDENAME }}</td><td>{{ b.GBAUJ }}</td></tr>
+  {% endfor %}
+</table>
+<nav>
+  {% if has_previous %}
+  <a href="#" hx-get="/explorer/ergebnisse/?page={{ previous_page }}" hx-include="#ex-filter-form"
+     hx-target="#ex-results">Zurück</a>
+  {% endif %}
+  <span>Seite {{ page }}</span>
+  {% if has_next %}
+  <a href="#" hx-get="/explorer/ergebnisse/?page={{ next_page }}" hx-include="#ex-filter-form"
+     hx-target="#ex-results">Weiter</a>
+  {% endif %}
+</nav>
