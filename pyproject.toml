@@ -22,6 +22,11 @@ dev = [
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint.per-file-ignores]
+# Django-generated migration files use mutable class-attribute defaults
+# (dependencies/operations lists) by design; not worth hand-editing generated code.
+"*/migrations/*.py" = ["RUF012"]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py"]
