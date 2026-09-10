@@ -1,0 +1,12 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+docs/
+node_modules/
+data_ch.sqlite
+app.sqlite
+tests/fixtures/*.sqlite-journal
+.DS_Store
