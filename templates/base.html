@@ -1,0 +1,14 @@
+<!doctype html>
+{% load static %}
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}GWR Explorer{% endblock %}</title>
+    <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  </head>
+  <body>
+    <nav><a href="/">Suche</a> · <a href="/statistik/">Statistik</a> · <a href="/karte/">Karte</a> · <a href="/explorer/">Explorer</a></nav>
+    <main>{% block content %}{% endblock %}</main>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<h1>GWR-Suche</h1>
+<input type="search" name="q" placeholder="Adresse, Gemeinde oder EGID"
+       hx-get="/suche/" hx-target="#results" hx-trigger="keyup changed delay:300ms" />
+<div id="results"></div>
+{% endblock %}
