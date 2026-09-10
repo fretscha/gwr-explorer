@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Gebäude {{ b.EGID }}{% endblock %}
+{% block content %}
+<h1>Gebäude EGID {{ b.EGID }}</h1>
+<table>
+  {% for a in attrs %}
+  <tr><th title="{{ a.col }}">{{ a.label }}</th><td>{{ a.value }}</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Eingänge / Adressen</h2>
+<ul>
+  {% for e in entrances %}<li>{{ e.STRNAME }} {{ e.DEINR }}, {{ e.DPLZ4 }} {{ e.DPLZNAME }}</li>{% endfor %}
+</ul>
+
+<h2>Wohnungen ({{ dwellings|length }})</h2>
+<table>
+  <tr>
+    <th title="WSTWK">Stockwerk</th><th title="WAZIM">Anzahl Zimmer</th>
+    <th title="WAREA">Wohnungsfläche (m²)</th><th title="WSTAT">Wohnungsstatus</th>
+  </tr>
+  {% for row in dwelling_rows %}
+  <tr>
+    <td>{{ row.floor }}</td>
+    <td>{{ row.rooms }}</td>
+    <td>{{ row.area }}</td>
+    <td>{{ row.status }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
