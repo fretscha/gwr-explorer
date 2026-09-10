@@ -20,6 +20,13 @@ def test_search_by_egid():
     assert any(h["egid"] == 1 for h in hits)
 
 
+def test_search_with_no_word_characters_returns_empty():
+    from src.services.search import SearchService
+
+    call_command("build_index", "--only", "search")
+    assert SearchService().search("!!!") == []
+
+
 def test_search_results_view_renders(client):
     call_command("build_index", "--only", "search")
     resp = client.get("/suche/", {"q": "Grossholzerstrasse"})

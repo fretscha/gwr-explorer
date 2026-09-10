@@ -16,6 +16,12 @@ class SearchService:
             if results:
                 return results
         match = " ".join(f'"{w}"*' for w in re.findall(r"\w+", term))
+        if not match:
+            # No word characters at all (e.g. "!!!", "-", "???") — an empty FTS5
+            # MATCH operand raises "fts5: syntax error near ''"; short-circuit
+            # instead of letting that propagate as an uncaught 500 from the
+            # live keyup search box.
+            return []
         with connections["default"].cursor() as cur:
             cur.execute(
                 "SELECT egid, label FROM search_entrance WHERE search_entrance MATCH ? ORDER BY rank LIMIT ?",
