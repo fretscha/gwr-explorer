@@ -16,11 +16,17 @@ def _int_param(request, name):
 
 def map_points(request):
     g = request.GET
+    try:
+        # Required bbox params: missing (KeyError) or non-numeric (ValueError) client
+        # input must yield a 400, not an uncaught exception -> raw 500.
+        south, west, north, east = (float(g["south"]), float(g["west"]), float(g["north"]), float(g["east"]))
+    except (KeyError, ValueError):
+        return JsonResponse({"error": "Ungültige oder fehlende bbox-Parameter (south/west/north/east)"}, status=400)
     fc = MapService().points_in_bbox(
-        float(g["south"]),
-        float(g["west"]),
-        float(g["north"]),
-        float(g["east"]),
+        south,
+        west,
+        north,
+        east,
         {
             "canton": g.get("canton"),
             "gkat": _int_param(request, "gkat"),

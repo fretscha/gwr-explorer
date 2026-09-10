@@ -26,3 +26,11 @@ def test_bbox_cap_sets_truncated():
     fc = MapService().points_in_bbox(-90, -180, 90, 180, {}, cap=10)
     assert fc["truncated"] is True
     assert len(fc["features"]) == 10
+
+
+def test_map_points_bad_bbox_params_return_400(client):
+    # Missing bbox param -> KeyError path in the view; must not surface as a raw 500.
+    assert client.get("/api/map/points/").status_code == 400
+    # Non-numeric bbox param -> ValueError path in the view; same guard.
+    resp = client.get("/api/map/points/", {"south": "not-a-number", "west": "0", "north": "1", "east": "1"})
+    assert resp.status_code == 400
