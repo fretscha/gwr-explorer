@@ -2,8 +2,11 @@ import logging
 
 from django.core.management.base import BaseCommand
 from django.db import connections
+from django.db.models import Count
 
-from src.models import Building, Entrance, MapPoint
+from src.models import Building, Dwelling, Entrance, MapPoint, StatsCache
+from src.services.labels import LabelService
+from src.utils.buckets import decade
 from src.utils.coords import CoordTransform
 
 logger = logging.getLogger(__name__)
@@ -22,7 +25,8 @@ class Command(BaseCommand):
             self._build_search(opts["limit"])
         if only in (None, "map"):
             self._build_map(opts["limit"])
-        # stats step is added in Task 8
+        if only in (None, "stats"):
+            self._build_stats()
         self.stdout.write(self.style.SUCCESS("build_index complete"))
 
     def _build_search(self, limit):
@@ -65,3 +69,31 @@ class Command(BaseCommand):
         if batch:
             MapPoint.objects.bulk_create(batch)
         logger.info("map_point built")
+
+    def _build_stats(self):
+        StatsCache.objects.all().delete()
+        labels = LabelService()
+        rows = []
+
+        def add(metric, key, label, value):
+            rows.append(StatsCache(metric=metric, dim_key=str(key), dim_label=label, value=value))
+
+        for r in Building.objects.using("gwr").values("GDEKT").annotate(n=Count("EGID")):
+            add("buildings_by_canton", r["GDEKT"], r["GDEKT"] or "unbekannt", r["n"])
+        for r in Building.objects.using("gwr").values("GKAT").annotate(n=Count("EGID")):
+            add("buildings_by_category", r["GKAT"], labels.value("GKAT", r["GKAT"]) or "unbekannt", r["n"])
+        for r in Building.objects.using("gwr").values("GSTAT").annotate(n=Count("EGID")):
+            add("building_status", r["GSTAT"], labels.value("GSTAT", r["GSTAT"]) or "unbekannt", r["n"])
+        for r in Building.objects.using("gwr").values("GENH1").annotate(n=Count("EGID")):
+            add("heating_energy", r["GENH1"], labels.value("GENH1", r["GENH1"]) or "unbekannt", r["n"])
+        decades: dict[str, int] = {}
+        for r in Building.objects.using("gwr").values("GBAUJ").annotate(n=Count("EGID")):
+            d = decade(r["GBAUJ"]) or "unbekannt"
+            decades[d] = decades.get(d, 0) + r["n"]
+        for d, n in sorted(decades.items()):
+            add("buildings_by_decade", d, d, n)
+        for r in Dwelling.objects.using("gwr").values("WAZIM").annotate(n=Count("id")):
+            key = r["WAZIM"]
+            add("dwellings_by_rooms", key, f"{key} Zimmer" if key else "unbekannt", r["n"])
+
+        StatsCache.objects.bulk_create(rows)
