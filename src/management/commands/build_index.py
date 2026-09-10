@@ -56,7 +56,9 @@ class Command(BaseCommand):
         batch = []
         for b in qs.iterator(chunk_size=5000):
             lat, lon = transform.to_wgs84(b.GKODE, b.GKODN)
-            batch.append(MapPoint(egid=b.EGID, lat=lat, lon=lon, canton=b.GDEKT, gkat=b.GKAT, gbauj=b.GBAUJ, genh1=b.GENH1))
+            batch.append(
+                MapPoint(egid=b.EGID, lat=lat, lon=lon, canton=b.GDEKT, gkat=b.GKAT, gbauj=b.GBAUJ, genh1=b.GENH1)
+            )
             if len(batch) >= 5000:
                 MapPoint.objects.bulk_create(batch)
                 batch.clear()
