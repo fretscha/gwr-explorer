@@ -11,4 +11,6 @@ urlpatterns = [
     path("explorer/ergebnisse/", views.explorer_results, name="explorer_results"),
     path("statistik/", views.stats, name="stats"),
     path("api/stats/<str:metric>/", api_views.stats_json, name="stats_json"),
+    path("karte/", views.map_page, name="map_page"),
+    path("api/map/points/", api_views.map_points, name="map_points"),
 ]

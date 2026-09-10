@@ -110,3 +110,7 @@ def stats(request):
     svc = StatsService()
     charts = [{"metric": m, "title": t, "rows": svc.metric(m)} for m, t in _DASHBOARD_METRICS]
     return render(request, "stats.html", {"charts": charts})
+
+
+def map_page(request):
+    return render(request, "map.html")

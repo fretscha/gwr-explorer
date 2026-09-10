@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Karte{% endblock %}
+{% block content %}
+<h1>Karte</h1>
+<link rel="stylesheet" href="{% static 'vendor/leaflet.css' %}" />
+<div id="map" style="height: 70vh"></div>
+<script src="{% static 'vendor/leaflet.js' %}"></script>
+<script src="{% static 'js/map.js' %}"></script>
+{% endblock %}
