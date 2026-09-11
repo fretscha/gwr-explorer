@@ -1,5 +1,7 @@
 import logging
 
+from django.utils.translation import get_language
+
 from src.models import Code
 from src.utils.field_labels import field_label
 
@@ -7,14 +9,18 @@ logger = logging.getLogger(__name__)
 
 
 class LabelService:
-    """Resolves cryptic field names and coded values to speaking German text."""
+    """Resolves cryptic field names and coded values to speaking text in the active language."""
 
     def __init__(self, code_queryset=None) -> None:
-        self._map: dict[tuple[str, int], str] = {}
+        self._map: dict[tuple[str, int], dict[str, str]] = {}
         try:
             rows = code_queryset if code_queryset is not None else Code.objects.all()
             for row in rows:
-                self._map[(row.CMERKM, row.CECODID)] = row.CODTXTLD
+                self._map[(row.CMERKM, row.CECODID)] = {
+                    "de": row.CODTXTLD,
+                    "fr": row.CODTXTLF,
+                    "it": row.CODTXTLI,
+                }
         except Exception:  # pragma: no cover - defensive; logged for debugging
             logger.exception("Failed to load code table")
             raise
@@ -25,4 +31,8 @@ class LabelService:
     def value(self, merkmal: str, code: int | None) -> str:
         if code is None:
             return ""
-        return self._map.get((merkmal, code), str(code))
+        entry = self._map.get((merkmal, code))
+        if not entry:
+            return str(code)
+        lang = get_language() or "de"
+        return entry.get(lang) or entry.get("de") or str(code)
