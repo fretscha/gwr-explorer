@@ -35,9 +35,22 @@ GWR_ZIP_URL = os.environ.get("GWR_ZIP_URL", "https://public.madd.bfs.admin.ch/ch
 
 # GeoDjango can't auto-locate Homebrew's GDAL/GEOS on macOS (they aren't on the
 # default search paths ctypes.util.find_library() checks); point at them
-# explicitly, overridable via env for other hosts (e.g. the Docker image).
-GDAL_LIBRARY_PATH = os.environ.get("GDAL_LIBRARY_PATH", "/opt/homebrew/lib/libgdal.dylib")
-GEOS_LIBRARY_PATH = os.environ.get("GEOS_LIBRARY_PATH", "/opt/homebrew/lib/libgeos_c.dylib")
+# explicitly on this host. Prefer an env override; otherwise use the Homebrew
+# path only if it actually exists on disk. On Linux (e.g. the Docker image)
+# neither the env var nor the Homebrew path is present, so we leave the
+# setting undefined entirely -- a truthy-but-wrong path makes GeoDjango skip
+# auto-detection and CDLL() it directly, raising OSError. Leaving it unset
+# lets GeoDjango auto-detect the apt-installed libs on Linux.
+_gdal = os.environ.get("GDAL_LIBRARY_PATH") or (
+    "/opt/homebrew/lib/libgdal.dylib" if os.path.exists("/opt/homebrew/lib/libgdal.dylib") else None
+)
+if _gdal:
+    GDAL_LIBRARY_PATH = _gdal
+_geos = os.environ.get("GEOS_LIBRARY_PATH") or (
+    "/opt/homebrew/lib/libgeos_c.dylib" if os.path.exists("/opt/homebrew/lib/libgeos_c.dylib") else None
+)
+if _geos:
+    GEOS_LIBRARY_PATH = _geos
 
 DATABASES = {
     "default": {
