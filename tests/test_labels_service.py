@@ -20,3 +20,5 @@ def test_value_and_field_per_language():
     assert svc.value("GKAT", 1020)  # French text present, non-empty, != German
     assert svc.value("GKAT", 1020) != "Gebäude mit ausschliesslicher Wohnnutzung"
     assert svc.value("GKAT", None) == ""
+    # Unknown code: no catalog entry, so the raw code is returned as-is.
+    assert svc.value("GKAT", 999999) == "999999"
