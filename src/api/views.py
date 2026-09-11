@@ -43,7 +43,7 @@ def search_results(request):
 
 def building_detail(request, egid: int):
     try:
-        b = Building.objects.using("gwr").get(EGID=egid)
+        b = Building.objects.get(EGID=egid)
     except Building.DoesNotExist as exc:
         raise Http404("Unbekannte EGID") from exc
     labels = LabelService()
@@ -52,8 +52,20 @@ def building_detail(request, egid: int):
         raw = getattr(b, col)
         value = labels.value(merkmal, raw) if merkmal else raw
         attrs.append({"col": col, "label": labels.field(col), "value": value})
-    entrances = list(Entrance.objects.using("gwr").filter(EGID=egid))
-    dwellings = list(Dwelling.objects.using("gwr").filter(EGID=egid))
+    # The GWR entrance CSV carries bilingual duplicate rows for the same
+    # physical address (identical STRNAME/DEINR/DPLZ4, differing only by
+    # STRSP language code); keep one row per address, preferring the
+    # official-language (STROFFIZIEL=1) variant.
+    entrances_qs = Entrance.objects.filter(EGID=egid).order_by("-STROFFIZIEL", "EDID")
+    seen = set()
+    entrances = []
+    for e in entrances_qs:
+        key = (e.STRNAME, e.DEINR, e.DPLZ4)
+        if key in seen:
+            continue
+        seen.add(key)
+        entrances.append(e)
+    dwellings = list(Dwelling.objects.filter(EGID=egid))
     # Precomputed here (not in the template) because Django templates can't
     # call labels.value(merkmal, code) with two arguments.
     dwelling_rows = [
