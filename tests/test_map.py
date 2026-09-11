@@ -21,3 +21,13 @@ def test_bbox_returns_in_view_and_caps():
     assert empty["features"] == []
     capped = MapService().points_in_bbox(-90, -180, 90, 180, {}, cap=10)
     assert capped["truncated"] is True and len(capped["features"]) == 10
+
+
+def test_map_points_bad_bbox_params_return_400(client):
+    # Missing bbox params entirely.
+    resp = client.get("/api/map/points/")
+    assert resp.status_code == 400
+
+    # Non-numeric south should also 400, not raise a raw 500.
+    resp = client.get("/api/map/points/", {"south": "not-a-number", "west": 8.3, "north": 47.6, "east": 8.8})
+    assert resp.status_code == 400

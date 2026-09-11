@@ -5,51 +5,68 @@ Register of Buildings and Dwellings (GWR / Gebäude- und Wohnungsregister):
 address search, a building detail view, a facet explorer, statistics
 dashboards and a map.
 
-## Two-database design
+## Architecture
 
-The app talks to two SQLite databases:
-
-- **`gwr`** — the original, read-only GWR source export (`data_ch.sqlite`,
-  ~1.7 GB). Django never writes to it; `config/db_router.py` routes the
-  unmanaged `src` models (`Building`, `Entrance`, `Dwelling`, `Code`) to this
-  alias and raises if a write is attempted, and the connection itself is
-  opened with `mode=ro` plus `PRAGMA query_only=1` as a second guard.
-- **`default`** (`app.sqlite`) — a small sidecar database owned by Django
-  migrations, holding derived/precomputed data: the FTS5 `search_entrance`
-  full-text index, `MapPoint` (reprojected WGS84 coordinates for the map) and
-  `StatsCache` (precomputed dashboard aggregates with resolved German
-  labels).
-
-The sidecar is built from the source via the `build_index` management
-command (see below) and must be rebuilt whenever `data_ch.sqlite` is
-refreshed — the app never queries `gwr` directly for search/map/stats, only
-for the building detail lookups.
+The app is backed by a single Postgres/PostGIS database (`default`). GWR
+data is loaded straight from the official CSV export (`ch.zip`) via the
+`import_gwr` management command, which parses the four bilingual GWR CSVs,
+type-converts and geocodes each row (reprojecting Swiss LV95 coordinates to
+a PostGIS `geom` column via `ST_Transform`) and loads `Building`, `Entrance`,
+`Dwelling` and `Code` tables directly — there is no separate read-only
+source database or derived sidecar database as in earlier iterations of this
+app. Search uses Postgres full-text search + trigram similarity, the map
+queries `geom` with a bbox filter, and the statistics dashboards read a
+materialized view (`mv_stats`) refreshed as part of `import_gwr`.
 
 ## Prerequisites
 
 - [`uv`](https://docs.astral.sh/uv/) (Python 3.12+ is pinned via
   `.python-version` / `pyproject.toml`)
-- The GWR source export, `data_ch.sqlite` (~1.7 GB), placed at the project
-  root, or pointed to via the `GWR_SOURCE_DB` environment variable.
+- Docker, to run the PostGIS database (see Setup below).
+- GDAL/GEOS/PROJ available on the host for local (non-Docker) development,
+  since GeoDjango loads them via `ctypes` at import time:
+
+  ```bash
+  brew install gdal geos proj
+  ```
+
+  (Not needed if you only ever run the app inside the Docker container,
+  which installs these as system packages — see `docker/Dockerfile`.)
 
 ## Setup
+
+Start the PostGIS database (either the compose service or an equivalent
+container you already run on port 5433):
+
+```bash
+docker compose -f docker/compose.yaml up -d db
+```
+
+Then:
 
 ```bash
 uv sync
 uv run python manage.py migrate
-uv run python manage.py build_index
+uv run python manage.py import_gwr
 ```
 
-`build_index` reads the (read-only) `gwr` source database and (re)builds the
-`default` sidecar database's search index, map points and stats cache. It
-takes a minute or two over the full dataset. Useful flags:
+`import_gwr` downloads the current GWR export (~946 MB) from
+`https://public.madd.bfs.admin.ch/ch.zip` and loads it — this takes a few
+minutes. If you already have the zip locally, point at it instead of
+downloading:
 
-- `--only search|map|stats` — rebuild just one artifact.
-- `--limit N` — cap the number of source rows read (handy for a quick local
-  smoke run instead of the full ~2M+ rows).
+```bash
+uv run python manage.py import_gwr --file /path/to/ch.zip
+```
 
-**Re-run `build_index` any time `data_ch.sqlite` is replaced/refreshed** —
-the sidecar is a point-in-time derived snapshot and does not update itself.
+**There is no scheduler or background job.** The register is a point-in-time
+snapshot; to refresh it, just re-run `import_gwr` (it is idempotent — safe to
+run again against the same or an updated `ch.zip`).
+
+Database connection settings (`PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`,
+`PGDATABASE`) default to the values in `docker/compose.yaml` (host port
+`5433`, db/user/password `gwr`) and can be overridden via environment
+variables.
 
 ## Run
 
@@ -67,9 +84,11 @@ uv run pytest
 uv run ruff check .
 ```
 
-Tests run against a small sampled fixture DB (`tests/fixtures/gwr_fixture.sqlite`,
-built by `tests/make_fixture.py`) instead of the real `data_ch.sqlite`, and
-against an in-memory `default` database — never against production data.
+Tests need the PostGIS container running (`docker compose -f
+docker/compose.yaml up -d db`) — pytest-django creates and migrates a
+`test_gwr` database against it. Tests exercise the real `import_gwr`
+pipeline against a small sampled fixture (`tests/fixtures/ch_sample.zip`,
+built by `tests/make_csv_fixture.py`), never against production data.
 
 ## Styling: Tailwind + Alpine
 
@@ -112,21 +131,21 @@ curl -sL -o static/vendor/alpine.min.js https://unpkg.com/alpinejs/dist/cdn.min.
 
 ## Docker
 
-A minimal dev container is provided under `docker/`:
+`docker/compose.yaml` runs both services: `db` (postgis/postgis, published on
+host port 5433) and `app` (built from `docker/Dockerfile`, which installs
+GDAL/GEOS/PROJ as system packages so GeoDjango works without host setup).
 
 ```bash
-# from the project root, with data_ch.sqlite present
 docker compose -f docker/compose.yaml up --build
 ```
 
-This builds the image, runs `migrate` then `runserver` on container start,
-mounts `data_ch.sqlite` read-only, persists `app.sqlite` in a named volume,
-and publishes the app on <http://localhost:8000/>. `build_index` is not run
-automatically (it can take minutes over the full dataset); run it once after
-first start and again whenever `data_ch.sqlite` changes:
+`docker/entrypoint.sh` waits for `db` to accept connections, runs `migrate`,
+then starts `runserver` on <http://localhost:8000/>. `import_gwr` is not run
+automatically (it downloads/loads real data and can take minutes); run it
+once after first start, and again whenever you want to refresh the data:
 
 ```bash
-docker compose -f docker/compose.yaml exec app uv run python manage.py build_index
+docker compose -f docker/compose.yaml exec app uv run python manage.py import_gwr
 ```
 
 The image runs with `DJANGO_DEBUG=1` by default (a dev container, so
