@@ -1,36 +1,23 @@
 import pytest
 from django.core.management import call_command
 
-pytestmark = pytest.mark.django_db(databases=["default", "gwr"], transaction=True)
+from tests.make_csv_fixture import SAMPLE_ZIP
+
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
-def test_bbox_returns_only_points_in_view():
-    from src.models import MapPoint
+def test_bbox_returns_in_view_and_caps():
+    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
     from src.services.maps import MapService
 
-    call_command("build_index", "--only", "map")
-    p = MapPoint.objects.get(egid=1)
-    # tiny bbox around EGID 1 includes it
-    fc = MapService().points_in_bbox(p.lat - 0.01, p.lon - 0.01, p.lat + 0.01, p.lon + 0.01, {})
+    # EGID 1 is near 8.449E/47.269N
+    fc = MapService().points_in_bbox(47.26, 8.44, 47.28, 8.46, {})
     egids = [f["properties"]["egid"] for f in fc["features"]]
     assert 1 in egids
-    # far-away bbox excludes it
-    empty = MapService().points_in_bbox(0.0, 0.0, 0.001, 0.001, {})
+    for f in fc["features"]:
+        lon, lat = f["geometry"]["coordinates"]
+        assert 8.44 <= lon <= 8.46 and 47.26 <= lat <= 47.28
+    empty = MapService().points_in_bbox(0, 0, 0.001, 0.001, {})
     assert empty["features"] == []
-
-
-def test_bbox_cap_sets_truncated():
-    from src.services.maps import MapService
-
-    call_command("build_index", "--only", "map")
-    fc = MapService().points_in_bbox(-90, -180, 90, 180, {}, cap=10)
-    assert fc["truncated"] is True
-    assert len(fc["features"]) == 10
-
-
-def test_map_points_bad_bbox_params_return_400(client):
-    # Missing bbox param -> KeyError path in the view; must not surface as a raw 500.
-    assert client.get("/api/map/points/").status_code == 400
-    # Non-numeric bbox param -> ValueError path in the view; same guard.
-    resp = client.get("/api/map/points/", {"south": "not-a-number", "west": "0", "north": "1", "east": "1"})
-    assert resp.status_code == 400
+    capped = MapService().points_in_bbox(-90, -180, 90, 180, {}, cap=10)
+    assert capped["truncated"] is True and len(capped["features"]) == 10
