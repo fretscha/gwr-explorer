@@ -77,6 +77,75 @@ uv run python manage.py runserver
 Then open <http://localhost:8000/> — Suche (search), `/statistik/`
 (dashboards), `/karte/` (map), `/explorer/` (facet explorer).
 
+## Languages (DE/FR/IT)
+
+The app is trilingual (German, French, Italian; German is the default).
+Every page lives under a locale prefix — `/de/`, `/fr/`, `/it/` — added by
+Django's `i18n_patterns()` (`config/urls.py`); a bare `/` 302-redirects to
+the resolved locale. The header includes a DE/FR/IT switcher (`base.html`)
+that posts to Django's built-in `set_language` view
+(`/i18n/setlang/`) and redirects back to the current page in the new
+language. `LocaleMiddleware` (`config/settings.py`) resolves the active
+language per-request from the URL prefix (falling back to the session/
+cookie/`Accept-Language` only outside `i18n_patterns`), so switching
+language is just a URL change — no separate per-language deployment or
+duplicated views.
+
+Two independent things are translated:
+
+- **UI chrome** (nav labels, buttons, static template strings) — standard
+  Django `gettext`/`{% trans %}` catalogs under `locale/<lang>/LC_MESSAGES/`.
+- **GWR field names and coded values** (e.g. `GKAT` → "Gebäudekategorie" /
+  "Catégorie de bâtiment" / "Categoria di edificio", and the coded value
+  labels such as `GKAT=1020` → "Gebäude mit ausschliesslicher
+  Wohnnutzung") — these come from the official GWR spec PDFs, not from
+  hand-translated msgids, since the register defines its own DE/FR/IT
+  vocabulary per field and per code. `src/services/labels.py`
+  (`LabelService`) and `src/utils/field_labels.py` resolve both against
+  the currently active language (`django.utils.translation.get_language()`),
+  so any view or template that calls `LabelService().field(...)` /
+  `.value(...)` or `field_label(...)` automatically renders in whichever
+  locale the request is in — including the `mv_stats` statistics dashboards,
+  which store the raw coded `dim_key` and resolve its display label
+  per-language at read time (`src/services/stats.py`), rather than baking a
+  language into the materialized view.
+
+### Regenerating field labels
+
+`src/utils/field_labels.py` (`FIELD_LABELS`, used by `field_label()`) is
+**generated**, not hand-written — it's parsed out of the official GWR field
+specification PDFs, which are not committed to this repo (see `ch/` in
+`.gitignore`). To regenerate it:
+
+```bash
+# Requires ch/gebaeude-batiment-edificio_specifications.pdf,
+# ch/eingang-entree-entrata_specifications.pdf and
+# ch/wohnung-logement-abitazione_specifications.pdf (download from
+# https://www.housing-stat.ch/ alongside ch.zip and place them in ch/).
+uv run python scripts/gen_field_labels.py
+```
+
+### UI chrome translation workflow
+
+Chrome strings (`{% trans %}`/`{% blocktrans %}` in templates, `gettext()`
+in Python) go through the normal Django message catalogs in `locale/`.
+Run these **from the project root**, not from inside `.venv`, so the scan
+is scoped to this project's source (templates/, `src/`) and catalogs
+(`locale/`) rather than also walking every installed package's own
+`locale/` directory under `.venv`:
+
+```bash
+uv run python manage.py makemessages -l de -l fr -l it
+# edit locale/{de,fr,it}/LC_MESSAGES/django.po, then:
+uv run python manage.py compilemessages
+```
+
+Both commands may still descend into other installed Django apps' own
+`locale/` directories (e.g. `django.contrib.admin`) if they ship
+translatable strings — that's expected and harmless. What matters is that
+`git status` afterwards only shows changes under this project's own
+`locale/*.po`/`locale/*.mo`; never commit changes under `.venv/`.
+
 ## Test
 
 ```bash
