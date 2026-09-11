@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.utils.translation import gettext_lazy as _
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-key")
@@ -12,11 +14,20 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "django.contrib.gis",
+    "django.contrib.sessions",
     "src",
 ]
 
+# Order matters: SessionMiddleware must run before LocaleMiddleware (set_language
+# and the language cookie/session need the session available), LocaleMiddleware
+# before CommonMiddleware (so the resolved language is set before CommonMiddleware
+# processes the request), and CsrfViewMiddleware is required by the set_language
+# view (it's a POST endpoint protected by Django's CSRF middleware).
 MIDDLEWARE = [
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -27,7 +38,12 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
-        "OPTIONS": {"context_processors": ["django.template.context_processors.request"]},
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
+            ]
+        },
     }
 ]
 
@@ -66,5 +82,14 @@ DATABASES = {
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-LANGUAGE_CODE = "de-ch"
+
+USE_I18N = True
+LANGUAGE_CODE = "de"
+LANGUAGES = [
+    ("de", _("German")),
+    ("fr", _("French")),
+    ("it", _("Italian")),
+]
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
 USE_TZ = True

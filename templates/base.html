@@ -1,6 +1,7 @@
 <!doctype html>
-{% load static %}
-<html lang="de">
+{% load static i18n %}
+{% get_current_language as CUR %}
+<html lang="{{ CUR }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +20,34 @@
           <a href="/karte/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">Karte</a>
           <a href="/explorer/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">Explorer</a>
         </div>
+        <form action="{% url 'set_language' %}" method="post" class="flex items-center gap-1">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}" />
+          <button
+            type="submit"
+            name="language"
+            value="de"
+            class="rounded-md px-2 py-1 text-xs font-semibold {% if CUR == 'de' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+          >
+            DE
+          </button>
+          <button
+            type="submit"
+            name="language"
+            value="fr"
+            class="rounded-md px-2 py-1 text-xs font-semibold {% if CUR == 'fr' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+          >
+            FR
+          </button>
+          <button
+            type="submit"
+            name="language"
+            value="it"
+            class="rounded-md px-2 py-1 text-xs font-semibold {% if CUR == 'it' %}bg-slate-900 text-white{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+          >
+            IT
+          </button>
+        </form>
       </div>
     </nav>
     <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6">

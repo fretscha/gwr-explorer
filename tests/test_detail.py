@@ -1,6 +1,7 @@
 import pytest
 from django.contrib.gis.geos import Point
 from django.core.management import call_command
+from django.urls import reverse
 
 from src.models import Building, Entrance
 from tests.make_csv_fixture import SAMPLE_ZIP
@@ -10,7 +11,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 def test_detail_speaking_labels(client):
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    resp = client.get("/gebaeude/1/")
+    resp = client.get(reverse("gwr:building_detail", args=[1]))
     assert resp.status_code == 200
     body = resp.content.decode()
     assert "Gebäudekategorie" in body and "Baujahr des Gebäudes" in body
@@ -19,7 +20,7 @@ def test_detail_speaking_labels(client):
 
 def test_detail_404(client):
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    assert client.get("/gebaeude/99999999/").status_code == 404
+    assert client.get(reverse("gwr:building_detail", args=[99999999])).status_code == 404
 
 
 @pytest.mark.django_db
@@ -53,7 +54,7 @@ def test_detail_dedups_bilingual_entrance_by_egid_edid(client):
         address_label="Rue de la Gare 5",
     )
 
-    resp = client.get(f"/gebaeude/{egid}/")
+    resp = client.get(reverse("gwr:building_detail", args=[egid]))
     assert resp.status_code == 200
     body = resp.content.decode()
     assert body.count("<li>") == 1

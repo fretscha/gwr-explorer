@@ -1,5 +1,6 @@
 import pytest
 from django.core.management import call_command
+from django.urls import reverse
 
 from tests.make_csv_fixture import SAMPLE_ZIP
 
@@ -24,10 +25,12 @@ def test_bbox_returns_in_view_and_caps():
 
 
 def test_map_points_bad_bbox_params_return_400(client):
+    url = reverse("gwr:map_points")
+
     # Missing bbox params entirely.
-    resp = client.get("/api/map/points/")
+    resp = client.get(url)
     assert resp.status_code == 400
 
     # Non-numeric south should also 400, not raise a raw 500.
-    resp = client.get("/api/map/points/", {"south": "not-a-number", "west": 8.3, "north": 47.6, "east": 8.8})
+    resp = client.get(url, {"south": "not-a-number", "west": 8.3, "north": 47.6, "east": 8.8})
     assert resp.status_code == 400
