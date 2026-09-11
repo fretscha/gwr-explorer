@@ -53,14 +53,16 @@ def building_detail(request, egid: int):
         value = labels.value(merkmal, raw) if merkmal else raw
         attrs.append({"col": col, "label": labels.field(col), "value": value})
     # The GWR entrance CSV carries bilingual duplicate rows for the same
-    # physical address (identical STRNAME/DEINR/DPLZ4, differing only by
-    # STRSP language code); keep one row per address, preferring the
-    # official-language (STROFFIZIEL=1) variant.
+    # physical entrance (same EGID/EDID, differing STRNAME/STRSP by language
+    # code -- bilingual communes even vary STRNAME per language for the same
+    # entrance). De-dup on the physical entrance identifier (EGID, EDID)
+    # rather than the address text, preferring the official-language
+    # (STROFFIZIEL=1) variant.
     entrances_qs = Entrance.objects.filter(EGID=egid).order_by("-STROFFIZIEL", "EDID")
     seen = set()
     entrances = []
     for e in entrances_qs:
-        key = (e.STRNAME, e.DEINR, e.DPLZ4)
+        key = (e.EGID, e.EDID)
         if key in seen:
             continue
         seen.add(key)
