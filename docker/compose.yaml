@@ -1,21 +1,29 @@
 services:
+  db:
+    image: postgis/postgis:17-3.4
+    environment:
+      POSTGRES_USER: gwr
+      POSTGRES_PASSWORD: gwr
+      POSTGRES_DB: gwr
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
   app:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    environment:
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: gwr
+      PGPASSWORD: gwr
+      PGDATABASE: gwr
+      DJANGO_DEBUG: "1"
+    depends_on:
+      - db
     ports:
       - "8000:8000"
-    environment:
-      GWR_SOURCE_DB: /app/data_ch.sqlite
-      GWR_APP_DB: /app/data/app.sqlite
-      DJANGO_DEBUG: "1"
-    volumes:
-      # Read-only mount of the ~1.7GB GWR source export; place it next to
-      # this compose file's project root before starting.
-      - ../data_ch.sqlite:/app/data_ch.sqlite:ro
-      # Named volume for the sidecar database so it survives container
-      # rebuilds (it's rebuilt via `build_index`, not migrations, on refresh).
-      - app_db:/app/data
 
 volumes:
-  app_db:
+  pgdata:

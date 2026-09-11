@@ -5,7 +5,7 @@ description = "GWR Explorer - Swiss GWR building & dwelling register search/map/
 requires-python = ">=3.12"
 dependencies = [
     "django>=5.0,<6.0",
-    "pyproj>=3.8.0",
+    "psycopg[binary]>=3.2",
 ]
 
 [tool.uv]
@@ -34,4 +34,3 @@ select = ["E4", "E7", "E9", "F", "E501"]
 DJANGO_SETTINGS_MODULE = "config.settings"
 python_files = ["test_*.py"]
 testpaths = ["tests"]
-addopts = "--no-migrations"

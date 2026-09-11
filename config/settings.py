@@ -10,6 +10,8 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
+    "django.contrib.gis",
     "src",
 ]
 
@@ -29,33 +31,24 @@ TEMPLATES = [
     }
 ]
 
-GWR_SOURCE_DB = os.environ.get("GWR_SOURCE_DB", str(BASE_DIR / "data_ch.sqlite"))
-GWR_APP_DB = os.environ.get("GWR_APP_DB", str(BASE_DIR / "app.sqlite"))
+GWR_ZIP_URL = os.environ.get("GWR_ZIP_URL", "https://public.madd.bfs.admin.ch/ch.zip")
 
-# Sqlite OPTIONS for opening the "gwr" alias read-only. Shared with
-# tests/conftest.py (which points this same alias at a sampled fixture file
-# instead of GWR_SOURCE_DB) so the two never drift apart.
-GWR_READONLY_OPTIONS = {"uri": True, "init_command": "PRAGMA query_only=1;"}
+# GeoDjango can't auto-locate Homebrew's GDAL/GEOS on macOS (they aren't on the
+# default search paths ctypes.util.find_library() checks); point at them
+# explicitly, overridable via env for other hosts (e.g. the Docker image).
+GDAL_LIBRARY_PATH = os.environ.get("GDAL_LIBRARY_PATH", "/opt/homebrew/lib/libgdal.dylib")
+GEOS_LIBRARY_PATH = os.environ.get("GEOS_LIBRARY_PATH", "/opt/homebrew/lib/libgeos_c.dylib")
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": GWR_APP_DB},
-    "gwr": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": f"file:{GWR_SOURCE_DB}?mode=ro",
-        "OPTIONS": GWR_READONLY_OPTIONS,
-        # gwr is a standalone read-only source DB with no FK relationship to "default"
-        # (allow_migrate already forbids migrating it). This normally guards against
-        # Django's test runner assuming every non-default alias depends on "default"
-        # ("Circular dependency in TEST[DEPENDENCIES]") when a test requests only
-        # databases=["gwr"]. In this project tests/conftest.py's custom
-        # django_db_setup fixture calls setup_databases() with an explicit aliases
-        # list that excludes "gwr" entirely, so that check never runs today — this
-        # is kept as belt-and-suspenders in case anything ever falls back to
-        # pytest-django's stock alias-from-markers behavior for this DB.
-        "TEST": {"DEPENDENCIES": []},
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.environ.get("PGDATABASE", "gwr"),
+        "USER": os.environ.get("PGUSER", "gwr"),
+        "PASSWORD": os.environ.get("PGPASSWORD", "gwr"),
+        "HOST": os.environ.get("PGHOST", "127.0.0.1"),
+        "PORT": os.environ.get("PGPORT", "5433"),
     },
 }
-DATABASE_ROUTERS = ["config.db_router.GwrRouter"]
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]

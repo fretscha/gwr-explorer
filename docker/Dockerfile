@@ -1,5 +1,12 @@
 FROM python:3.12-slim
 
+# GeoDjango needs the GDAL/GEOS/PROJ shared libs (and binutils, which
+# ctypes.util.find_library() shells out to via `objdump` on some platforms)
+# available at runtime, not just at build time.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    binutils libproj-dev gdal-bin libgdal-dev libgeos-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # uv gives us fast, reproducible installs from uv.lock without needing a
 # separate pip/venv dance in the image.
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
@@ -13,14 +20,7 @@ RUN uv sync --frozen
 
 COPY . .
 
-# This is a local dev image: DEBUG stays on so `runserver` also serves
-# static assets (app.css, vendored JS) without a separate collectstatic /
-# WhiteNoise setup. Override DJANGO_DEBUG=0 to check the production error
-# pages (404.html/500.html) locally.
-ENV PYTHONUNBUFFERED=1 \
-    DJANGO_DEBUG=1 \
-    GWR_SOURCE_DB=/app/data_ch.sqlite \
-    GWR_APP_DB=/app/data/app.sqlite
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 
