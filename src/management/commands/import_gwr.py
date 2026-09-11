@@ -67,6 +67,10 @@ class Command(BaseCommand):
                 self._load(zf, DWELLINGS, "stg_dwelling", DWELLING_COLS, opts["limit"])
                 self._load(zf, CODES, "stg_code", CODE_COLS, None)
                 self._transform()
+        # Outside the atomic block: refresh mv_stats only after the import
+        # transaction has committed, so the view reflects the newly loaded data.
+        with connection.cursor() as cur:
+            cur.execute("REFRESH MATERIALIZED VIEW mv_stats")
         self.stdout.write(self.style.SUCCESS("import_gwr complete"))
 
     def _obtain(self, opts, tmp):

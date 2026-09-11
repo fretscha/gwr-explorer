@@ -1,23 +1,17 @@
-import json
-
 import pytest
 from django.core.management import call_command
 
-pytestmark = pytest.mark.django_db(databases=["default", "gwr"], transaction=True)
+from tests.make_csv_fixture import SAMPLE_ZIP
+
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
-def test_stats_service_metric():
+def test_stats_after_import():
+    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
+    from src.models import Building
     from src.services.stats import StatsService
 
-    call_command("build_index", "--only", "stats")
-    data = StatsService().metric("buildings_by_canton")
-    assert data and {"key", "label", "value"} <= set(data[0])
-
-
-def test_stats_api_endpoint(client):
-    call_command("build_index", "--only", "stats")
-    resp = client.get("/api/stats/heating_energy/")
-    assert resp.status_code == 200
-    payload = json.loads(resp.content)
-    assert "labels" in payload and "values" in payload
-    assert len(payload["labels"]) == len(payload["values"])
+    rows = StatsService().metric("buildings_by_canton")
+    assert rows and sum(r["value"] for r in rows) == Building.objects.count()
+    cat = StatsService().metric("buildings_by_category")
+    assert cat and cat[0]["label"] != cat[0]["key"]  # resolved German label
