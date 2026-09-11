@@ -11,7 +11,7 @@ class SearchService:
         results: list[dict] = []
         if re.fullmatch(r"\d+", term):
             with connections["default"].cursor() as cur:
-                cur.execute("SELECT egid, label FROM search_entrance WHERE egid = ? LIMIT ?", (int(term), limit))
+                cur.execute("SELECT egid, label FROM search_entrance WHERE egid = %s LIMIT %s", (int(term), limit))
                 results = [{"egid": r[0], "label": r[1]} for r in cur.fetchall()]
             if results:
                 return results
@@ -24,7 +24,7 @@ class SearchService:
             return []
         with connections["default"].cursor() as cur:
             cur.execute(
-                "SELECT egid, label FROM search_entrance WHERE search_entrance MATCH ? ORDER BY rank LIMIT ?",
+                "SELECT egid, label FROM search_entrance WHERE search_entrance MATCH %s ORDER BY rank LIMIT %s",
                 (match, limit),
             )
             results = [{"egid": r[0], "label": r[1]} for r in cur.fetchall()]
