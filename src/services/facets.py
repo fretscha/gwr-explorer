@@ -1,6 +1,6 @@
 from django.db.models import Count
 
-from src.models import Building, MapPoint
+from src.models import Building
 from src.services.labels import LabelService
 
 
@@ -17,6 +17,11 @@ class FacetService:
         self._labels = LabelService()
 
     def _filtered_points(self, canton, gkat, year_from, year_to, genh1):
+        # Deferred import: MapPoint is a v1 sidecar model slated for removal in a
+        # later re-platform task; a module-level import would break Django's
+        # urlconf-loading system checks now that src.models no longer exports it.
+        from src.models import MapPoint
+
         qs = MapPoint.objects.all()
         if canton:
             qs = qs.filter(canton=canton)

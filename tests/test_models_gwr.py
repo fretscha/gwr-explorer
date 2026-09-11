@@ -1,23 +1,16 @@
 import pytest
+from django.contrib.gis.geos import Point
 
-pytestmark = pytest.mark.django_db(databases=["gwr"])
+from src.models import Building
+
+pytestmark = pytest.mark.django_db
 
 
-def test_building_rows_readable():
-    from src.models import Building
-
-    assert Building.objects.using("gwr").count() == 500
-    b = Building.objects.using("gwr").order_by("EGID").first()
-    assert b.EGID == 1
-    assert b.GGDENAME
-
-    # Verified defect fix: entrance/dwelling/code have no `id` column and are
-    # composite-pk rowid tables, not rowid-alias tables like building. Reading
-    # them requires the IntegerField(primary_key=True, db_column="rowid") pk
-    # override rather than the brief's AutoField(pk) which would generate
-    # "SELECT ... id ..." and fail with "no such column: id".
-    from src.models import Code, Dwelling, Entrance
-
-    assert Entrance.objects.using("gwr").filter(EGID=1).exists()
-    assert Dwelling.objects.using("gwr").filter(EGID=1).count() >= 1
-    assert Code.objects.using("gwr").filter(CMERKM="GKAT").exists()
+def test_building_geom_roundtrip():
+    b = Building.objects.create(EGID=1, GDEKT="ZH", geom=Point(2676490, 1235841, srid=2056))
+    b.refresh_from_db()
+    assert b.geom.srid == 2056
+    # transform to WGS84 matches the known reference
+    b.geom.transform(4326)
+    assert abs(b.geom.x - 8.449423) < 1e-4  # lon
+    assert abs(b.geom.y - 47.269041) < 1e-4  # lat

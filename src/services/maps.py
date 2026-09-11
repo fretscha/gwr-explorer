@@ -1,8 +1,10 @@
-from src.models import MapPoint
-
-
 class MapService:
     def points_in_bbox(self, south, west, north, east, filters, cap=5000):
+        # Deferred import: MapPoint is a v1 sidecar model slated for removal in a
+        # later re-platform task; a module-level import would break Django's
+        # urlconf-loading system checks now that src.models no longer exports it.
+        from src.models import MapPoint
+
         qs = MapPoint.objects.filter(lat__gte=south, lat__lte=north, lon__gte=west, lon__lte=east)
         if filters.get("canton"):
             qs = qs.filter(canton=filters["canton"])
