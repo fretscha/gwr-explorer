@@ -12,7 +12,7 @@ class LabelService:
     def __init__(self, code_queryset=None) -> None:
         self._map: dict[tuple[str, int], str] = {}
         try:
-            rows = code_queryset if code_queryset is not None else Code.objects.using("gwr").all()
+            rows = code_queryset if code_queryset is not None else Code.objects.all()
             for row in rows:
                 self._map[(row.CMERKM, row.CECODID)] = row.CODTXTLD
         except Exception:  # pragma: no cover - defensive; logged for debugging

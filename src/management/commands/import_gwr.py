@@ -145,6 +145,7 @@ class Command(BaseCommand):
                 f'THEN ST_SetSRID(ST_MakePoint({_n("DKODE")}::float8, {_n("DKODN")}::float8), 2056) END '
                 "FROM stg_entrance"
             )
+            cur.execute("UPDATE entrance SET search_vector = to_tsvector('simple', coalesce(address_label,''))")
 
             # dwelling
             cur.execute(

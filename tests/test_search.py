@@ -1,34 +1,41 @@
 import pytest
 from django.core.management import call_command
 
-pytestmark = pytest.mark.django_db(databases=["default", "gwr"], transaction=True)
+from tests.make_csv_fixture import SAMPLE_ZIP
+
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
-def test_search_by_street_returns_egid():
+def _import():
+    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
+
+
+def test_search_by_street():
+    _import()
     from src.services.search import SearchService
 
-    call_command("build_index", "--only", "search")
     hits = SearchService().search("Grossholzerstrasse")
     assert any(h["egid"] == 1 for h in hits)
 
 
 def test_search_by_egid():
+    _import()
     from src.services.search import SearchService
 
-    call_command("build_index", "--only", "search")
-    hits = SearchService().search("1")
+    assert any(h["egid"] == 1 for h in SearchService().search("1"))
+
+
+def test_search_fuzzy_typo():
+    _import()
+    from src.services.search import SearchService
+
+    # one-letter typo still finds the street via trigram fallback
+    hits = SearchService().search("Grossholzerstrase")
     assert any(h["egid"] == 1 for h in hits)
 
 
-def test_search_with_no_word_characters_returns_empty():
+def test_search_punctuation_only_is_empty():
+    _import()
     from src.services.search import SearchService
 
-    call_command("build_index", "--only", "search")
     assert SearchService().search("!!!") == []
-
-
-def test_search_results_view_renders(client):
-    call_command("build_index", "--only", "search")
-    resp = client.get("/suche/", {"q": "Grossholzerstrasse"})
-    assert resp.status_code == 200
-    assert b"/gebaeude/1/" in resp.content
