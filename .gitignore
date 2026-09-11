@@ -10,3 +10,6 @@ node_modules/
 
 # Tailwind standalone CLI binary (downloaded per README, not committed)
 /tailwindcss
+
+# Unzipped GWR CSV export (multi-GB source data, not tracked)
+ch/
