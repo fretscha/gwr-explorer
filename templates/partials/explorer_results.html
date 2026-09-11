@@ -1,17 +1,18 @@
-<p class="mb-2 text-sm text-slate-600">{{ count }} Gebäude</p>
+{% load i18n %}
+<p class="mb-2 text-sm text-slate-600">{% blocktrans with n=count %}{{ n }} Gebäude{% endblocktrans %}</p>
 <div class="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
   <table class="min-w-full divide-y divide-slate-200 text-sm">
     <thead class="bg-slate-50">
       <tr>
-        <th title="EGID" class="px-4 py-2 text-left font-medium text-slate-600">EGID</th>
-        <th title="GGDENAME" class="px-4 py-2 text-left font-medium text-slate-600">Gemeindename</th>
-        <th title="GBAUJ" class="px-4 py-2 text-left font-medium text-slate-600">Baujahr des Gebäudes</th>
+        <th title="EGID" class="px-4 py-2 text-left font-medium text-slate-600">{% trans "EGID" %}</th>
+        <th title="GGDENAME" class="px-4 py-2 text-left font-medium text-slate-600">{% trans "Gemeindename" %}</th>
+        <th title="GBAUJ" class="px-4 py-2 text-left font-medium text-slate-600">{% trans "Baujahr des Gebäudes" %}</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-slate-100">
       {% for b in results %}
       <tr class="hover:bg-slate-50">
-        <td class="px-4 py-2"><a href="/gebaeude/{{ b.EGID }}/" class="text-slate-900 hover:underline">{{ b.EGID }}</a></td>
+        <td class="px-4 py-2"><a href="{% url 'gwr:building_detail' b.EGID %}" class="text-slate-900 hover:underline">{{ b.EGID }}</a></td>
         <td class="px-4 py-2">{{ b.GGDENAME }}</td>
         <td class="px-4 py-2">{{ b.GBAUJ }}</td>
       </tr>
@@ -21,17 +22,17 @@
 </div>
 <nav class="mt-4 flex items-center justify-between text-sm">
   {% if has_previous %}
-  <a href="#" hx-get="/explorer/ergebnisse/?page={{ previous_page }}" hx-include="#ex-filter-form"
+  <a href="#" hx-get="{% url 'gwr:explorer_results' %}?page={{ previous_page }}" hx-include="#ex-filter-form"
      hx-target="#ex-results"
-     class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">Zurück</a>
+     class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">{% trans "Zurück" %}</a>
   {% else %}
   <span></span>
   {% endif %}
-  <span class="text-slate-600">Seite {{ page }}</span>
+  <span class="text-slate-600">{% blocktrans with n=page %}Seite {{ n }}{% endblocktrans %}</span>
   {% if has_next %}
-  <a href="#" hx-get="/explorer/ergebnisse/?page={{ next_page }}" hx-include="#ex-filter-form"
+  <a href="#" hx-get="{% url 'gwr:explorer_results' %}?page={{ next_page }}" hx-include="#ex-filter-form"
      hx-target="#ex-results"
-     class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">Weiter</a>
+     class="rounded-md border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-100">{% trans "Weiter" %}</a>
   {% else %}
   <span></span>
   {% endif %}

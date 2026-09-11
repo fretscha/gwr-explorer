@@ -1,0 +1,221 @@
+# French UI chrome translations for GWR Explorer.
+msgid ""
+msgstr ""
+"Project-Id-Version: GWR Explorer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-11 07:51-0500\n"
+"PO-Revision-Date: 2026-09-11 00:00+0100\n"
+"Last-Translator: GWR Explorer team\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: config/settings.py:89
+msgid "German"
+msgstr "Allemand"
+
+#: config/settings.py:90
+msgid "French"
+msgstr "Français"
+
+#: config/settings.py:91
+msgid "Italian"
+msgstr "Italien"
+
+#: src/api/views.py:12
+msgid "Gebäude pro Kanton"
+msgstr "Bâtiments par canton"
+
+#: src/api/views.py:13
+msgid "Gebäude nach Baujahrzehnt"
+msgstr "Bâtiments par décennie de construction"
+
+#: src/api/views.py:14 templates/explorer.html:17
+msgid "Gebäudekategorie"
+msgstr "Catégorie de bâtiment"
+
+#: src/api/views.py:15
+msgid "Energie-/Wärmequelle Heizung"
+msgstr "Source d'énergie / de chaleur pour le chauffage"
+
+#: src/api/views.py:16
+msgid "Wohnungen nach Zimmerzahl"
+msgstr "Logements par nombre de pièces"
+
+#: src/api/views.py:17
+msgid "Gebäudestatus"
+msgstr "Statut du bâtiment"
+
+#: src/services/stats.py:23
+msgid "unbekannt"
+msgstr "inconnu"
+
+#: src/services/stats.py:33
+msgid "Zimmer"
+msgstr "pièces"
+
+#: templates/404.html:3
+msgid "Nicht gefunden"
+msgstr "Introuvable"
+
+#: templates/404.html:7
+msgid ""
+"Die angeforderte Seite wurde nicht gefunden. Möglicherweise ist die EGID "
+"unbekannt oder der Link ist fehlerhaft."
+msgstr ""
+"La page demandée est introuvable. L'EGID est peut-être inconnu ou le lien "
+"est erroné."
+
+#: templates/404.html:8 templates/500.html:8
+msgid "Zurück zur Startseite"
+msgstr "Retour à la page d'accueil"
+
+#: templates/500.html:3
+msgid "Serverfehler"
+msgstr "Erreur serveur"
+
+#: templates/500.html:7
+msgid ""
+"Es ist ein interner Serverfehler aufgetreten. Bitte versuchen Sie es später "
+"erneut."
+msgstr ""
+"Une erreur interne du serveur s'est produite. Veuillez réessayer plus "
+"tard."
+
+#: templates/base.html:18
+msgid "Suche"
+msgstr "Recherche"
+
+#: templates/base.html:19 templates/stats.html:3 templates/stats.html:5
+msgid "Statistik"
+msgstr "Statistiques"
+
+#: templates/base.html:20 templates/map.html:3 templates/map.html:5
+msgid "Karte"
+msgstr "Carte"
+
+#: templates/base.html:21 templates/explorer.html:3 templates/explorer.html:5
+msgid "Explorer"
+msgstr "Explorateur"
+
+#: templates/building_detail.html:3
+#, python-format
+msgid "Gebäude %(egid)s"
+msgstr "Bâtiment %(egid)s"
+
+#: templates/building_detail.html:5
+#, python-format
+msgid "Gebäude EGID %(egid)s"
+msgstr "Bâtiment EGID %(egid)s"
+
+#: templates/building_detail.html:21
+msgid "Eingänge / Adressen"
+msgstr "Entrées / Adresses"
+
+#: templates/building_detail.html:28
+#, python-format
+msgid "Wohnungen (%(n)s)"
+msgstr "Logements (%(n)s)"
+
+#: templates/building_detail.html:33
+msgid "Stockwerk"
+msgstr "Étage"
+
+#: templates/building_detail.html:34
+msgid "Anzahl Zimmer"
+msgstr "Nombre de pièces"
+
+#: templates/building_detail.html:35
+msgid "Wohnungsfläche (m²)"
+msgstr "Surface du logement (m²)"
+
+#: templates/building_detail.html:36
+msgid "Wohnungsstatus"
+msgstr "Statut du logement"
+
+#: templates/explorer.html:10
+msgid "Kanton"
+msgstr "Canton"
+
+#: templates/explorer.html:12 templates/explorer.html:19
+#: templates/explorer.html:26
+msgid "alle"
+msgstr "tous"
+
+#: templates/explorer.html:24
+msgid "Heizungsart"
+msgstr "Type de chauffage"
+
+#: templates/explorer.html:31
+msgid "Baujahr von"
+msgstr "Année de construction dès"
+
+#: templates/explorer.html:35
+msgid "bis"
+msgstr "jusqu'à"
+
+#: templates/partials/explorer_results.html:2
+#, python-format
+msgid "%(n)s Gebäude"
+msgstr "%(n)s bâtiments"
+
+#: templates/partials/explorer_results.html:7
+#: templates/partials/search_results.html:6
+msgid "EGID"
+msgstr "EGID"
+
+#: templates/partials/explorer_results.html:8
+msgid "Gemeindename"
+msgstr "Nom de la commune"
+
+#: templates/partials/explorer_results.html:9
+msgid "Baujahr des Gebäudes"
+msgstr "Année de construction du bâtiment"
+
+#: templates/partials/explorer_results.html:27
+msgid "Zurück"
+msgstr "Précédent"
+
+#: templates/partials/explorer_results.html:31
+#, python-format
+msgid "Seite %(n)s"
+msgstr "Page %(n)s"
+
+#: templates/partials/explorer_results.html:35
+msgid "Weiter"
+msgstr "Suivant"
+
+#: templates/partials/search_results.html:9
+msgid "Keine Treffer."
+msgstr "Aucun résultat."
+
+#: templates/search.html:6
+msgid "GWR-Suche"
+msgstr "Recherche GWR"
+
+#: templates/search.html:7
+msgid "Adresse, Gemeinde oder EGID"
+msgstr "Adresse, commune ou EGID"
+
+#: templates/stats.html:13
+msgid ""
+"JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur "
+"Verfügung."
+msgstr ""
+"JavaScript est désactivé — les données sont disponibles ci-dessous sous "
+"forme de tableau."
+
+#: templates/stats.html:16
+msgid "Daten als Tabelle"
+msgstr "Données sous forme de tableau"
+
+#: templates/stats.html:20
+msgid "Kategorie"
+msgstr "Catégorie"
+
+#: templates/stats.html:20
+msgid "Anzahl"
+msgstr "Nombre"

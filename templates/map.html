@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% load static %}
-{% block title %}Karte{% endblock %}
+{% load static i18n %}
+{% block title %}{% trans "Karte" %}{% endblock %}
 {% block content %}
-<h1 class="mb-4 text-2xl font-semibold text-slate-900">Karte</h1>
+<h1 class="mb-4 text-2xl font-semibold text-slate-900">{% trans "Karte" %}</h1>
 <link rel="stylesheet" href="{% static 'vendor/leaflet.css' %}" />
 <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-  <div id="map" style="height: 70vh"></div>
+  <div id="map" data-points-url="{% url 'gwr:map_points' %}" data-building-url-template="{% url 'gwr:building_detail' 0 %}" style="height: 70vh"></div>
 </div>
 <script src="{% static 'vendor/leaflet.js' %}"></script>
 <script src="{% static 'js/map.js' %}"></script>

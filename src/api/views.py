@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
 
 from src.models import Building, Dwelling, Entrance
 from src.services.facets import FacetService
@@ -8,12 +9,12 @@ from src.services.search import SearchService
 from src.services.stats import StatsService
 
 _DASHBOARD_METRICS = [
-    ("buildings_by_canton", "Gebäude pro Kanton"),
-    ("buildings_by_decade", "Gebäude nach Baujahrzehnt"),
-    ("buildings_by_category", "Gebäudekategorie"),
-    ("heating_energy", "Energie-/Wärmequelle Heizung"),
-    ("dwellings_by_rooms", "Wohnungen nach Zimmerzahl"),
-    ("building_status", "Gebäudestatus"),
+    ("buildings_by_canton", _("Gebäude pro Kanton")),
+    ("buildings_by_decade", _("Gebäude nach Baujahrzehnt")),
+    ("buildings_by_category", _("Gebäudekategorie")),
+    ("heating_energy", _("Energie-/Wärmequelle Heizung")),
+    ("dwellings_by_rooms", _("Wohnungen nach Zimmerzahl")),
+    ("building_status", _("Gebäudestatus")),
 ]
 
 # (column, coded-field name or None for a raw/free-text value)

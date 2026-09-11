@@ -1,10 +1,11 @@
+{% load i18n %}
 <ul class="divide-y divide-slate-200 rounded-md border border-slate-200 bg-white">
   {% for hit in hits %}
     <li class="px-4 py-2 text-sm hover:bg-slate-50">
-      <a href="/gebaeude/{{ hit.egid }}/" class="font-medium text-slate-900 hover:underline">{{ hit.label }}</a>
-      <small title="EGID" class="ml-2 text-slate-500">EGID {{ hit.egid }}</small>
+      <a href="{% url 'gwr:building_detail' hit.egid %}" class="font-medium text-slate-900 hover:underline">{{ hit.label }}</a>
+      <small title="EGID" class="ml-2 text-slate-500">{% trans "EGID" %} {{ hit.egid }}</small>
     </li>
   {% empty %}
-    <li class="px-4 py-2 text-sm text-slate-500">Keine Treffer.</li>
+    <li class="px-4 py-2 text-sm text-slate-500">{% trans "Keine Treffer." %}</li>
   {% endfor %}
 </ul>

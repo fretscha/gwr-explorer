@@ -13,12 +13,12 @@
   <body class="min-h-screen bg-slate-50 text-slate-900">
     <nav class="border-b border-slate-200 bg-white shadow-sm">
       <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6">
-        <a href="/" class="text-lg font-semibold tracking-tight text-slate-900">GWR Explorer</a>
+        <a href="{% url 'gwr:search' %}" class="text-lg font-semibold tracking-tight text-slate-900">GWR Explorer</a>
         <div class="flex flex-wrap gap-1">
-          <a href="/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">Suche</a>
-          <a href="/statistik/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">Statistik</a>
-          <a href="/karte/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">Karte</a>
-          <a href="/explorer/" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">Explorer</a>
+          <a href="{% url 'gwr:search' %}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">{% trans "Suche" %}</a>
+          <a href="{% url 'gwr:stats' %}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">{% trans "Statistik" %}</a>
+          <a href="{% url 'gwr:map_page' %}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">{% trans "Karte" %}</a>
+          <a href="{% url 'gwr:explorer' %}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">{% trans "Explorer" %}</a>
         </div>
         <form action="{% url 'set_language' %}" method="post" class="flex items-center gap-1">
           {% csrf_token %}

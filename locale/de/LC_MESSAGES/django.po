@@ -1,0 +1,221 @@
+# German (source language) UI chrome translations for GWR Explorer.
+msgid ""
+msgstr ""
+"Project-Id-Version: GWR Explorer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-11 07:51-0500\n"
+"PO-Revision-Date: 2026-09-11 00:00+0100\n"
+"Last-Translator: GWR Explorer team\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: config/settings.py:89
+msgid "German"
+msgstr "Deutsch"
+
+#: config/settings.py:90
+msgid "French"
+msgstr "Französisch"
+
+#: config/settings.py:91
+msgid "Italian"
+msgstr "Italienisch"
+
+#: src/api/views.py:12
+msgid "Gebäude pro Kanton"
+msgstr "Gebäude pro Kanton"
+
+#: src/api/views.py:13
+msgid "Gebäude nach Baujahrzehnt"
+msgstr "Gebäude nach Baujahrzehnt"
+
+#: src/api/views.py:14 templates/explorer.html:17
+msgid "Gebäudekategorie"
+msgstr "Gebäudekategorie"
+
+#: src/api/views.py:15
+msgid "Energie-/Wärmequelle Heizung"
+msgstr "Energie-/Wärmequelle Heizung"
+
+#: src/api/views.py:16
+msgid "Wohnungen nach Zimmerzahl"
+msgstr "Wohnungen nach Zimmerzahl"
+
+#: src/api/views.py:17
+msgid "Gebäudestatus"
+msgstr "Gebäudestatus"
+
+#: src/services/stats.py:23
+msgid "unbekannt"
+msgstr "unbekannt"
+
+#: src/services/stats.py:33
+msgid "Zimmer"
+msgstr "Zimmer"
+
+#: templates/404.html:3
+msgid "Nicht gefunden"
+msgstr "Nicht gefunden"
+
+#: templates/404.html:7
+msgid ""
+"Die angeforderte Seite wurde nicht gefunden. Möglicherweise ist die EGID "
+"unbekannt oder der Link ist fehlerhaft."
+msgstr ""
+"Die angeforderte Seite wurde nicht gefunden. Möglicherweise ist die EGID "
+"unbekannt oder der Link ist fehlerhaft."
+
+#: templates/404.html:8 templates/500.html:8
+msgid "Zurück zur Startseite"
+msgstr "Zurück zur Startseite"
+
+#: templates/500.html:3
+msgid "Serverfehler"
+msgstr "Serverfehler"
+
+#: templates/500.html:7
+msgid ""
+"Es ist ein interner Serverfehler aufgetreten. Bitte versuchen Sie es später "
+"erneut."
+msgstr ""
+"Es ist ein interner Serverfehler aufgetreten. Bitte versuchen Sie es später "
+"erneut."
+
+#: templates/base.html:18
+msgid "Suche"
+msgstr "Suche"
+
+#: templates/base.html:19 templates/stats.html:3 templates/stats.html:5
+msgid "Statistik"
+msgstr "Statistik"
+
+#: templates/base.html:20 templates/map.html:3 templates/map.html:5
+msgid "Karte"
+msgstr "Karte"
+
+#: templates/base.html:21 templates/explorer.html:3 templates/explorer.html:5
+msgid "Explorer"
+msgstr "Explorer"
+
+#: templates/building_detail.html:3
+#, python-format
+msgid "Gebäude %(egid)s"
+msgstr "Gebäude %(egid)s"
+
+#: templates/building_detail.html:5
+#, python-format
+msgid "Gebäude EGID %(egid)s"
+msgstr "Gebäude EGID %(egid)s"
+
+#: templates/building_detail.html:21
+msgid "Eingänge / Adressen"
+msgstr "Eingänge / Adressen"
+
+#: templates/building_detail.html:28
+#, python-format
+msgid "Wohnungen (%(n)s)"
+msgstr "Wohnungen (%(n)s)"
+
+#: templates/building_detail.html:33
+msgid "Stockwerk"
+msgstr "Stockwerk"
+
+#: templates/building_detail.html:34
+msgid "Anzahl Zimmer"
+msgstr "Anzahl Zimmer"
+
+#: templates/building_detail.html:35
+msgid "Wohnungsfläche (m²)"
+msgstr "Wohnungsfläche (m²)"
+
+#: templates/building_detail.html:36
+msgid "Wohnungsstatus"
+msgstr "Wohnungsstatus"
+
+#: templates/explorer.html:10
+msgid "Kanton"
+msgstr "Kanton"
+
+#: templates/explorer.html:12 templates/explorer.html:19
+#: templates/explorer.html:26
+msgid "alle"
+msgstr "alle"
+
+#: templates/explorer.html:24
+msgid "Heizungsart"
+msgstr "Heizungsart"
+
+#: templates/explorer.html:31
+msgid "Baujahr von"
+msgstr "Baujahr von"
+
+#: templates/explorer.html:35
+msgid "bis"
+msgstr "bis"
+
+#: templates/partials/explorer_results.html:2
+#, python-format
+msgid "%(n)s Gebäude"
+msgstr "%(n)s Gebäude"
+
+#: templates/partials/explorer_results.html:7
+#: templates/partials/search_results.html:6
+msgid "EGID"
+msgstr "EGID"
+
+#: templates/partials/explorer_results.html:8
+msgid "Gemeindename"
+msgstr "Gemeindename"
+
+#: templates/partials/explorer_results.html:9
+msgid "Baujahr des Gebäudes"
+msgstr "Baujahr des Gebäudes"
+
+#: templates/partials/explorer_results.html:27
+msgid "Zurück"
+msgstr "Zurück"
+
+#: templates/partials/explorer_results.html:31
+#, python-format
+msgid "Seite %(n)s"
+msgstr "Seite %(n)s"
+
+#: templates/partials/explorer_results.html:35
+msgid "Weiter"
+msgstr "Weiter"
+
+#: templates/partials/search_results.html:9
+msgid "Keine Treffer."
+msgstr "Keine Treffer."
+
+#: templates/search.html:6
+msgid "GWR-Suche"
+msgstr "GWR-Suche"
+
+#: templates/search.html:7
+msgid "Adresse, Gemeinde oder EGID"
+msgstr "Adresse, Gemeinde oder EGID"
+
+#: templates/stats.html:13
+msgid ""
+"JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur "
+"Verfügung."
+msgstr ""
+"JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur "
+"Verfügung."
+
+#: templates/stats.html:16
+msgid "Daten als Tabelle"
+msgstr "Daten als Tabelle"
+
+#: templates/stats.html:20
+msgid "Kategorie"
+msgstr "Kategorie"
+
+#: templates/stats.html:20
+msgid "Anzahl"
+msgstr "Anzahl"
