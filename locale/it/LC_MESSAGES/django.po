@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GWR Explorer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-11 07:51-0500\n"
+"POT-Creation-Date: 2026-09-11 08:11-0500\n"
 "PO-Revision-Date: 2026-09-11 00:00+0100\n"
 "Last-Translator: GWR Explorer team\n"
 "Language-Team: Italian\n"
@@ -66,8 +66,8 @@ msgid ""
 "Die angeforderte Seite wurde nicht gefunden. Möglicherweise ist die EGID "
 "unbekannt oder der Link ist fehlerhaft."
 msgstr ""
-"La pagina richiesta non è stata trovata. L'EGID potrebbe essere "
-"sconosciuto o il link non è corretto."
+"La pagina richiesta non è stata trovata. L'EGID potrebbe essere sconosciuto "
+"o il link non è corretto."
 
 #: templates/404.html:8 templates/500.html:8
 msgid "Zurück zur Startseite"
@@ -81,8 +81,7 @@ msgstr "Errore del server"
 msgid ""
 "Es ist ein interner Serverfehler aufgetreten. Bitte versuchen Sie es später "
 "erneut."
-msgstr ""
-"Si è verificato un errore interno del server. Riprovare più tardi."
+msgstr "Si è verificato un errore interno del server. Riprovare più tardi."
 
 #: templates/base.html:18
 msgid "Suche"
@@ -199,6 +198,10 @@ msgstr "Ricerca GWR"
 msgid "Adresse, Gemeinde oder EGID"
 msgstr "Indirizzo, Comune o EGID"
 
+#: templates/stats.html:11 templates/stats.html:20
+msgid "Anzahl"
+msgstr "Numero"
+
 #: templates/stats.html:13
 msgid ""
 "JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur "
@@ -214,7 +217,3 @@ msgstr "Dati in forma di tabella"
 #: templates/stats.html:20
 msgid "Kategorie"
 msgstr "Categoria"
-
-#: templates/stats.html:20
-msgid "Anzahl"
-msgstr "Numero"

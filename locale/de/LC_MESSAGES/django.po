@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GWR Explorer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-11 07:51-0500\n"
+"POT-Creation-Date: 2026-09-11 08:11-0500\n"
 "PO-Revision-Date: 2026-09-11 00:00+0100\n"
 "Last-Translator: GWR Explorer team\n"
 "Language-Team: German\n"
@@ -200,6 +200,10 @@ msgstr "GWR-Suche"
 msgid "Adresse, Gemeinde oder EGID"
 msgstr "Adresse, Gemeinde oder EGID"
 
+#: templates/stats.html:11 templates/stats.html:20
+msgid "Anzahl"
+msgstr "Anzahl"
+
 #: templates/stats.html:13
 msgid ""
 "JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur "
@@ -215,7 +219,3 @@ msgstr "Daten als Tabelle"
 #: templates/stats.html:20
 msgid "Kategorie"
 msgstr "Kategorie"
-
-#: templates/stats.html:20
-msgid "Anzahl"
-msgstr "Anzahl"

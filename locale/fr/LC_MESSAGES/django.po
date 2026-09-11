@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GWR Explorer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-11 07:51-0500\n"
+"POT-Creation-Date: 2026-09-11 08:11-0500\n"
 "PO-Revision-Date: 2026-09-11 00:00+0100\n"
 "Last-Translator: GWR Explorer team\n"
 "Language-Team: French\n"
@@ -82,8 +82,7 @@ msgid ""
 "Es ist ein interner Serverfehler aufgetreten. Bitte versuchen Sie es später "
 "erneut."
 msgstr ""
-"Une erreur interne du serveur s'est produite. Veuillez réessayer plus "
-"tard."
+"Une erreur interne du serveur s'est produite. Veuillez réessayer plus tard."
 
 #: templates/base.html:18
 msgid "Suche"
@@ -200,6 +199,10 @@ msgstr "Recherche GWR"
 msgid "Adresse, Gemeinde oder EGID"
 msgstr "Adresse, commune ou EGID"
 
+#: templates/stats.html:11 templates/stats.html:20
+msgid "Anzahl"
+msgstr "Nombre"
+
 #: templates/stats.html:13
 msgid ""
 "JavaScript ist deaktiviert — die Daten stehen unten als Tabelle zur "
@@ -215,7 +218,3 @@ msgstr "Données sous forme de tableau"
 #: templates/stats.html:20
 msgid "Kategorie"
 msgstr "Catégorie"
-
-#: templates/stats.html:20
-msgid "Anzahl"
-msgstr "Nombre"
