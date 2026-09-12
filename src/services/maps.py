@@ -33,9 +33,13 @@ class MapService:
         # can bulge slightly beyond the true image of the rectangle. That can admit
         # a handful of points just outside the requested bbox, so re-check exact
         # bounds in WGS84 after transforming back, before applying the cap.
+        # GENH1 (heating method → circle colour) and GEBF (Energiebezugsfläche /
+        # heated surface m² → circle size) travel with each point so the map can
+        # render coloured, size-scaled circles without a per-point round-trip.
         sql = (
-            'SELECT "EGID", lon, lat FROM ('
-            'SELECT "EGID", ST_X(ST_Transform(geom, 4326)) AS lon, ST_Y(ST_Transform(geom, 4326)) AS lat '
+            'SELECT "EGID", lon, lat, "GENH1", "GEBF" FROM ('
+            'SELECT "EGID", "GENH1", "GEBF", '
+            "ST_X(ST_Transform(geom, 4326)) AS lon, ST_Y(ST_Transform(geom, 4326)) AS lat "
             "FROM building WHERE " + " AND ".join(where) + ") s "
             "WHERE lon BETWEEN %s AND %s AND lat BETWEEN %s AND %s "
             "LIMIT %s"
@@ -51,7 +55,7 @@ class MapService:
                 "type": "Feature",
                 # GeoJSON coordinate order is [lon, lat] — not [lat, lon].
                 "geometry": {"type": "Point", "coordinates": [r[1], r[2]]},
-                "properties": {"egid": r[0]},
+                "properties": {"egid": r[0], "genh1": r[3], "gebf": r[4]},
             }
             for r in rows
         ]

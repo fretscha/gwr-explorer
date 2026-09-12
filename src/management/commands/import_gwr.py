@@ -125,12 +125,12 @@ class Command(BaseCommand):
             # building (+ geom)
             cur.execute(
                 'INSERT INTO building ("EGID","GDEKT","GGDENR","GGDENAME","GKODE","GKODN",'
-                '"GSTAT","GKAT","GKLAS","GBAUJ","GBAUP","GAREA","GVOL","GASTW","GANZWHG",'
+                '"GSTAT","GKAT","GKLAS","GBAUJ","GBAUP","GAREA","GEBF","GVOL","GASTW","GANZWHG",'
                 '"GENH1","GENH2", geom) '
                 f'SELECT {_n("EGID")}::int, "GDEKT", {_n("GGDENR")}::int, "GGDENAME", '
                 f'{_n("GKODE")}::float8, {_n("GKODN")}::float8, '
                 f'{_n("GSTAT")}::int, {_n("GKAT")}::int, {_n("GKLAS")}::int, {_n("GBAUJ")}::int, '
-                f'{_n("GBAUP")}::int, {_n("GAREA")}::int, {_n("GVOL")}::int, {_n("GASTW")}::int, '
+                f'{_n("GBAUP")}::int, {_n("GAREA")}::int, {_n("GEBF")}::int, {_n("GVOL")}::int, {_n("GASTW")}::int, '
                 f'{_n("GANZWHG")}::int, {_n("GENH1")}::int, {_n("GENH2")}::int, '
                 f'CASE WHEN {_n("GKODE")} IS NOT NULL AND {_n("GKODN")} IS NOT NULL '
                 f'THEN ST_SetSRID(ST_MakePoint({_n("GKODE")}::float8, {_n("GKODN")}::float8), 2056) END '

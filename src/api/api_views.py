@@ -14,6 +14,13 @@ def _int_param(request, name):
     return int(v) if v and v.isdigit() else None
 
 
+# The map only draws objects once the viewport holds fewer than 100 of them; the
+# user zooms in until at most this many remain. cap=99 means a 100th match trips
+# `truncated`, and we ship no features so the client shows a "zoom in" hint rather
+# than a dense, unreadable blob.
+MAP_POINT_LIMIT = 99
+
+
 def map_points(request):
     g = request.GET
     try:
@@ -32,5 +39,10 @@ def map_points(request):
             "gkat": _int_param(request, "gkat"),
             "genh1": _int_param(request, "genh1"),
         },
+        cap=MAP_POINT_LIMIT,
     )
+    # Above the threshold the client renders nothing, so don't ship points it will
+    # only discard.
+    if fc["truncated"]:
+        fc["features"] = []
     return JsonResponse(fc)

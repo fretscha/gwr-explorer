@@ -17,6 +17,7 @@ class Building(models.Model):
     GBAUJ = models.IntegerField(db_column="GBAUJ", null=True, db_index=True)
     GBAUP = models.IntegerField(db_column="GBAUP", null=True)
     GAREA = models.IntegerField(db_column="GAREA", null=True)
+    GEBF = models.IntegerField(db_column="GEBF", null=True)  # Energiebezugsfläche (heated surface m²)
     GVOL = models.IntegerField(db_column="GVOL", null=True)
     GASTW = models.IntegerField(db_column="GASTW", null=True)
     GANZWHG = models.IntegerField(db_column="GANZWHG", null=True)

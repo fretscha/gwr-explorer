@@ -3,25 +3,111 @@ const mapEl = document.getElementById("map");
 // carry the active language prefix (e.g. /fr/api/map/points/, /fr/gebaeude/0/).
 const pointsUrl = mapEl.dataset.pointsUrl;
 const buildingUrlTemplate = mapEl.dataset.buildingUrlTemplate;
+// Heating-group display labels are rendered server-side with {% trans %}, so the
+// legend and popups follow the active language without shipping a translation
+// table to the client.
+const heatingLabels = JSON.parse(mapEl.dataset.heatingLabels);
+const surfaceLabel = mapEl.dataset.surfaceLabel;
+
+const hintEl = document.getElementById("map-hint");
+const legendEl = document.getElementById("map-legend");
 
 function buildingUrl(egid) {
   return buildingUrlTemplate.replace(/0\/$/, `${egid}/`);
+}
+
+// GENH1 heating-source codes → semantic group. Group order is fixed so a group's
+// colour never depends on which groups happen to be in view (colour follows the
+// entity, not its rank).
+const HEATING_GROUPS = [
+  { key: "heat_pump", color: "#1baf7a", codes: [7501, 7510, 7511, 7512, 7513] },
+  { key: "gas", color: "#eb6834", codes: [7520] },
+  { key: "oil", color: "#e34948", codes: [7530] },
+  { key: "wood", color: "#008300", codes: [7540, 7541, 7542, 7543] },
+  { key: "waste_heat", color: "#4a3aa7", codes: [7550] },
+  { key: "electric", color: "#e87ba4", codes: [7560] },
+  { key: "solar", color: "#eda100", codes: [7570] },
+  { key: "district", color: "#2a78d6", codes: [7580, 7581, 7582] },
+  // Keine (7500), Unbestimmt (7598), Andere (7599), missing → neutral grey.
+  { key: "none_other", color: "#898781", codes: [7500, 7598, 7599] },
+];
+const NONE_OTHER = HEATING_GROUPS[HEATING_GROUPS.length - 1];
+
+const groupByCode = new Map();
+HEATING_GROUPS.forEach((g) => g.codes.forEach((c) => groupByCode.set(c, g)));
+
+function heatingGroup(genh1) {
+  return groupByCode.get(genh1) || NONE_OTHER;
+}
+
+// Circle AREA is proportional to heated surface (GEBF m²), so the radius scales
+// with its square root. Clamped so tiny buildings stay visible and huge ones
+// don't swamp neighbours. Missing/zero GEBF renders at the minimum radius.
+const MIN_R = 4;
+const MAX_R = 26;
+const R_SCALE = 0.7; // ~10px at 200 m²
+
+function circleRadius(gebf) {
+  if (!gebf || gebf <= 0) return MIN_R;
+  return Math.max(MIN_R, Math.min(MAX_R, R_SCALE * Math.sqrt(gebf)));
 }
 
 const map = L.map("map").setView([46.8, 8.2], 8);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
 let layer = L.layerGroup().addTo(map);
 
+function renderLegend() {
+  if (legendEl.dataset.built) return;
+  legendEl.innerHTML = HEATING_GROUPS.map(
+    (g) =>
+      `<div style="display:flex; align-items:center; gap:0.5rem; padding:0.1rem 0;">` +
+      `<span style="display:inline-block; flex:none; width:0.75rem; height:0.75rem; border-radius:9999px;` +
+      ` border:1px solid #fff; box-shadow:0 0 1px rgba(0,0,0,0.4); background:${g.color};"></span>` +
+      `<span>${heatingLabels[g.key]}</span></div>`,
+  ).join("");
+  legendEl.dataset.built = "1";
+}
+
 async function refresh() {
   const b = map.getBounds();
   const q = new URLSearchParams({ south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast() });
   const fc = await (await fetch(`${pointsUrl}?${q}`)).json();
   layer.clearLayers();
+
+  // Only draw objects once fewer than 100 are in view; above that the server
+  // returns truncated with no features and we prompt the user to zoom in.
+  if (fc.truncated) {
+    hintEl.style.display = "block";
+    legendEl.style.display = "none";
+    return;
+  }
+  hintEl.style.display = "none";
+  if (fc.features.length) {
+    renderLegend();
+    legendEl.style.display = "block";
+  } else {
+    legendEl.style.display = "none";
+  }
+
   fc.features.forEach((f) => {
     const [lon, lat] = f.geometry.coordinates;
-    L.marker([lat, lon])
+    const { egid, genh1, gebf } = f.properties;
+    const group = heatingGroup(genh1);
+    // Colour = heating method; a 1.5px white ring keeps overlapping circles
+    // visually separated (the secondary encoding the legend relies on).
+    L.circleMarker([lat, lon], {
+      radius: circleRadius(gebf),
+      color: "#ffffff",
+      weight: 1.5,
+      fillColor: group.color,
+      fillOpacity: 0.85,
+    })
       .addTo(layer)
-      .bindPopup(`<a href="${buildingUrl(f.properties.egid)}">EGID ${f.properties.egid}</a>`);
+      .bindPopup(
+        `<a href="${buildingUrl(egid)}">EGID ${egid}</a><br>` +
+          `${heatingLabels[group.key]}<br>` +
+          `${surfaceLabel}: ${gebf ? `${gebf} m²` : "–"}`,
+      );
   });
 }
 map.on("moveend", refresh);

@@ -24,6 +24,34 @@ def test_bbox_returns_in_view_and_caps():
     assert capped["truncated"] is True and len(capped["features"]) == 10
 
 
+def test_features_carry_heating_method_and_heated_surface():
+    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
+    from src.services.maps import MapService
+
+    # Each point must expose GENH1 (heating method, for colour) and GEBF
+    # (Energiebezugsfläche / heated surface m², for circle size) so the client
+    # can render coloured, size-scaled circles without a second round-trip.
+    fc = MapService().points_in_bbox(47.26, 8.44, 47.28, 8.46, {})
+    assert fc["features"], "expected at least one building near EGID 1"
+    for f in fc["features"]:
+        assert "genh1" in f["properties"]
+        assert "gebf" in f["properties"]
+
+
+def test_map_view_hides_points_at_or_above_threshold(client):
+    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
+    url = reverse("gwr:map_points")
+
+    # The map only draws objects when fewer than 100 are in view: a world-spanning
+    # bbox covers all 500 sample buildings, so the view reports truncated and
+    # ships no features (the client shows a "zoom in" hint instead).
+    resp = client.get(url, {"south": -90, "west": -180, "north": 90, "east": 180})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["truncated"] is True
+    assert data["features"] == []
+
+
 def test_map_points_bad_bbox_params_return_400(client):
     url = reverse("gwr:map_points")
 

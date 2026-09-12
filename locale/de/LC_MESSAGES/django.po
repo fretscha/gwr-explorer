@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GWR Explorer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-11 08:11-0500\n"
+"POT-Creation-Date: 2026-09-11 09:47-0500\n"
 "PO-Revision-Date: 2026-09-11 00:00+0100\n"
 "Last-Translator: GWR Explorer team\n"
 "Language-Team: German\n"
@@ -156,6 +156,54 @@ msgstr "Baujahr von"
 #: templates/explorer.html:35
 msgid "bis"
 msgstr "bis"
+
+#: templates/map.html:14
+msgid "Wärmepumpe / Umweltwärme"
+msgstr "Wärmepumpe / Umweltwärme"
+
+#: templates/map.html:14
+msgid "Gas"
+msgstr "Gas"
+
+#: templates/map.html:14
+msgid "Heizöl"
+msgstr "Heizöl"
+
+#: templates/map.html:14
+msgid "Holz"
+msgstr "Holz"
+
+#: templates/map.html:14
+msgid "Abwärme"
+msgstr "Abwärme"
+
+#: templates/map.html:14
+msgid "Elektrizität"
+msgstr "Elektrizität"
+
+#: templates/map.html:14
+msgid "Sonne (thermisch)"
+msgstr "Sonne (thermisch)"
+
+#: templates/map.html:14
+msgid "Fernwärme"
+msgstr "Fernwärme"
+
+#: templates/map.html:14
+msgid "Keine / Andere"
+msgstr "Keine / Andere"
+
+#: templates/map.html:15
+msgid "Beheizte Fläche"
+msgstr "Beheizte Fläche"
+
+#: templates/map.html:22
+msgid ""
+"Zu viele Objekte (100 oder mehr) — zoomen Sie hinein, bis weniger als 100 "
+"angezeigt werden."
+msgstr ""
+"Zu viele Objekte (100 oder mehr) — zoomen Sie hinein, bis weniger als 100 "
+"angezeigt werden."
 
 #: templates/partials/explorer_results.html:2
 #, python-format
