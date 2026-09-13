@@ -48,6 +48,10 @@ TEMPLATES = [
 ]
 
 GWR_ZIP_URL = os.environ.get("GWR_ZIP_URL", "https://public.madd.bfs.admin.ch/ch.zip")
+# Persistent cache for the downloaded ch.zip so import_gwr reuses it instead of
+# re-fetching ~1.7 GB on every run. Override with GWR_ZIP_PATH (e.g. a mounted
+# volume in Docker so it survives container recreation).
+GWR_ZIP_PATH = Path(os.environ.get("GWR_ZIP_PATH", BASE_DIR / "data" / "ch.zip"))
 
 # GeoDjango can't auto-locate Homebrew's GDAL/GEOS on macOS (they aren't on the
 # default search paths ctypes.util.find_library() checks); point at them

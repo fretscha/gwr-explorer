@@ -1,21 +1,24 @@
 """Import the GWR CSV export (ch.zip) into PostgreSQL/PostGIS.
 
-Pipeline: obtain ch.zip (local --file or download --url) -> inside ONE
-transaction, COPY each of the 4 TSVs into an all-text UNLOGGED staging table,
-then TRUNCATE + INSERT...SELECT with casts into the typed model tables,
-building geometry (LV95 / EPSG:2056) for buildings and entrances along the
-way. Staging tables are dropped at the end. Re-running replaces all data
+Pipeline: obtain ch.zip (local --file, or a cached download reused across runs)
+-> inside ONE transaction, COPY each of the 4 TSVs into an all-text UNLOGGED
+staging table, then TRUNCATE + INSERT...SELECT with casts into the typed model
+tables, building geometry (LV95 / EPSG:2056) for buildings and entrances along
+the way. Staging tables are dropped at the end. Re-running replaces all data
 (truncate + reload), so the command is idempotent.
+
+The ~1.7 GB ch.zip is downloaded to a persistent cache (settings.GWR_ZIP_PATH)
+only when it is missing or --download forces a refresh, so repeated imports do
+not re-fetch it.
 """
 
 import io
-import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
 
 from django.conf import settings
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
 BUILDINGS = "gebaeude_batiment_edificio.csv"
@@ -53,35 +56,51 @@ class Command(BaseCommand):
     help = "Import the GWR CSV export (ch.zip) into PostgreSQL/PostGIS."
 
     def add_arguments(self, parser):
-        parser.add_argument("--file", default=None, help="Local ch.zip (skip download).")
+        parser.add_argument("--file", default=None, help="Local ch.zip (bypasses the download cache).")
         parser.add_argument("--url", default=settings.GWR_ZIP_URL)
-        parser.add_argument("--skip-download", action="store_true")
+        parser.add_argument(
+            "--download",
+            action="store_true",
+            help="Force a fresh download even if the cached ch.zip already exists.",
+        )
+        parser.add_argument(
+            "--cache", default=None, help="Path to the cached ch.zip (default: settings.GWR_ZIP_PATH)."
+        )
         parser.add_argument("--limit", type=int, default=None, help="Limit rows per CSV (for dev).")
 
     def handle(self, *args, **opts):
-        with tempfile.TemporaryDirectory() as tmp:
-            zip_path = self._obtain(opts, Path(tmp))
-            with zipfile.ZipFile(zip_path) as zf, transaction.atomic():
-                self._load(zf, BUILDINGS, "stg_building", BUILDING_COLS, opts["limit"])
-                self._load(zf, ENTRANCES, "stg_entrance", ENTRANCE_COLS, opts["limit"])
-                self._load(zf, DWELLINGS, "stg_dwelling", DWELLING_COLS, opts["limit"])
-                self._load(zf, CODES, "stg_code", CODE_COLS, None)
-                self._transform()
+        zip_path = self._obtain(opts)
+        with zipfile.ZipFile(zip_path) as zf, transaction.atomic():
+            self._load(zf, BUILDINGS, "stg_building", BUILDING_COLS, opts["limit"])
+            self._load(zf, ENTRANCES, "stg_entrance", ENTRANCE_COLS, opts["limit"])
+            self._load(zf, DWELLINGS, "stg_dwelling", DWELLING_COLS, opts["limit"])
+            self._load(zf, CODES, "stg_code", CODE_COLS, None)
+            self._transform()
         # Outside the atomic block: refresh mv_stats only after the import
         # transaction has committed, so the view reflects the newly loaded data.
         with connection.cursor() as cur:
             cur.execute("REFRESH MATERIALIZED VIEW mv_stats")
         self.stdout.write(self.style.SUCCESS("import_gwr complete"))
 
-    def _obtain(self, opts, tmp):
+    def _obtain(self, opts):
+        """Return a local ch.zip path, downloading to the cache only when needed."""
         if opts["file"]:
-            return opts["file"]
-        if opts["skip_download"]:
-            raise CommandError("--skip-download requires --file")
-        dest = tmp / "ch.zip"
-        self.stdout.write(f"Downloading {opts['url']} ...")
-        urllib.request.urlretrieve(opts["url"], dest)  # noqa: S310 (trusted BFS URL)
-        return dest
+            return Path(opts["file"])
+        cache = Path(opts["cache"]) if opts.get("cache") else settings.GWR_ZIP_PATH
+        if opts["download"] or not cache.exists():
+            self._download(opts["url"], cache)
+        else:
+            self.stdout.write(f"Using cached {cache}")
+        return cache
+
+    def _download(self, url, cache):
+        # Download to a sibling .part file and rename on success, so an interrupted
+        # download never leaves a truncated file that a later run would trust.
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        part = cache.with_name(cache.name + ".part")
+        self.stdout.write(f"Downloading {url} -> {cache} ...")
+        urllib.request.urlretrieve(url, part)  # noqa: S310 (trusted BFS URL)
+        part.replace(cache)
 
     def _load(self, zf, csv_name, staging, cols, limit):
         """COPY the TSV into an all-text staging table via psycopg COPY."""

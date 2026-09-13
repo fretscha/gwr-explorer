@@ -13,3 +13,6 @@ node_modules/
 
 # Unzipped GWR CSV export (multi-GB source data, not tracked)
 ch/
+
+# Cached ch.zip download (multi-GB, not tracked)
+data/
