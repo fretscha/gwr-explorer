@@ -8,7 +8,7 @@ from src.management.commands.import_gwr import Command
 
 
 def _opts(**over):
-    base = {"file": None, "download": False, "cache": None, "url": "http://example.test/ch.zip"}
+    base = {"file": None, "force_download": False, "cache": None, "url": "http://example.test/ch.zip"}
     base.update(over)
     return base
 
@@ -44,7 +44,7 @@ def test_force_download_replaces_existing_cache(tmp_path, monkeypatch):
     cache.write_bytes(b"old")
     monkeypatch.setattr(urllib.request, "urlretrieve", lambda url, dest: Path(dest).write_bytes(b"new"))
 
-    Command()._obtain(_opts(cache=str(cache), download=True))
+    Command()._obtain(_opts(cache=str(cache), force_download=True))
 
     assert cache.read_bytes() == b"new"
 

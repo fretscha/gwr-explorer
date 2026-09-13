@@ -52,14 +52,15 @@ uv run python manage.py import_gwr
 
 `import_gwr` downloads the current GWR export (~946 MB) from
 `https://public.madd.bfs.admin.ch/ch.zip` and loads it — this takes a few
-minutes. The download is cached (`data/ch.zip`, overridable via the
-`GWR_ZIP_PATH` env var), so subsequent runs reuse it instead of re-fetching.
-Pass `--download` to force a fresh download, or `--file` to load a zip you
-already have:
+minutes. The download is cached at `data/ch.zip` (overridable via the
+`GWR_ZIP_PATH` env var), so **subsequent runs reuse the existing zip instead of
+re-downloading**. Pass `--force-download` to refresh that cached zip from the
+source before importing, or `--file` to load a zip you already have:
 
 ```bash
-uv run python manage.py import_gwr --file /path/to/ch.zip   # use a local zip
-uv run python manage.py import_gwr --download               # force re-download
+uv run python manage.py import_gwr                          # reuse cached data/ch.zip
+uv run python manage.py import_gwr --force-download         # refresh the cache, then import
+uv run python manage.py import_gwr --file /path/to/ch.zip   # use a specific local zip
 ```
 
 **There is no scheduler or background job.** The register is a point-in-time

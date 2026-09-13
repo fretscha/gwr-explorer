@@ -59,9 +59,9 @@ class Command(BaseCommand):
         parser.add_argument("--file", default=None, help="Local ch.zip (bypasses the download cache).")
         parser.add_argument("--url", default=settings.GWR_ZIP_URL)
         parser.add_argument(
-            "--download",
+            "--force-download",
             action="store_true",
-            help="Force a fresh download even if the cached ch.zip already exists.",
+            help="Re-download ch.zip to refresh the cache, even if it already exists, then import.",
         )
         parser.add_argument(
             "--cache", default=None, help="Path to the cached ch.zip (default: settings.GWR_ZIP_PATH)."
@@ -83,14 +83,15 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("import_gwr complete"))
 
     def _obtain(self, opts):
-        """Return a local ch.zip path, downloading to the cache only when needed."""
+        """Return a local ch.zip path. By default the cached file is reused; a
+        download only happens when it is missing or --force-download is given."""
         if opts["file"]:
             return Path(opts["file"])
         cache = Path(opts["cache"]) if opts.get("cache") else settings.GWR_ZIP_PATH
-        if opts["download"] or not cache.exists():
+        if opts["force_download"] or not cache.exists():
             self._download(opts["url"], cache)
         else:
-            self.stdout.write(f"Using cached {cache}")
+            self.stdout.write(f"Using cached {cache} (pass --force-download to refresh it)")
         return cache
 
     def _download(self, url, cache):
