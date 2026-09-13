@@ -35,16 +35,20 @@ def map_points(request):
     limit = _int_param(request, "limit")
     if limit not in MAP_POINT_LIMITS:
         limit = DEFAULT_MAP_POINT_LIMIT
-    filters = {
-        "canton": g.get("canton"),
-        "gkat": _int_param(request, "gkat"),
-        "genh1": _int_param(request, "genh1"),
-    }
-    svc = MapService()
-    fc = svc.points_in_bbox(south, west, north, east, filters, cap=limit - 1)
-    # At or above the threshold the client draws no per-building circles; instead of
-    # the discarded points it gets a density grid to render as a heatmap overview.
+    fc = MapService().points_in_bbox(
+        south,
+        west,
+        north,
+        east,
+        {
+            "canton": g.get("canton"),
+            "gkat": _int_param(request, "gkat"),
+            "genh1": _int_param(request, "genh1"),
+        },
+        cap=limit - 1,
+    )
+    # At or above the threshold the client renders nothing, so don't ship points it
+    # will only discard.
     if fc["truncated"]:
         fc["features"] = []
-        fc["density"] = svc.density_in_bbox(south, west, north, east, filters)["cells"]
     return JsonResponse(fc)

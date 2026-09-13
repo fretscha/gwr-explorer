@@ -54,37 +54,6 @@ def test_map_view_hides_points_at_or_above_threshold(client):
     assert data["features"] == []
 
 
-def test_density_grid_aggregates_points():
-    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.services.maps import MapService
-
-    # A wide bbox over the whole sample returns weighted grid cells (lat, lng,
-    # count) whose counts sum to the number of buildings with geometry in view.
-    d = MapService().density_in_bbox(46.0, 7.0, 48.0, 10.0, {}, cols=16)
-    assert d["cells"], "expected non-empty density grid"
-    assert d["max"] >= 1
-    for lat, lng, n in d["cells"]:
-        assert 46.0 <= lat <= 48.0 and 7.0 <= lng <= 10.0 and n >= 1
-    assert d["max"] == max(n for _, _, n in d["cells"])
-
-
-def test_map_view_returns_density_when_truncated(client):
-    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    url = reverse("gwr:map_points")
-    world = {"south": -90, "west": -180, "north": 90, "east": 180}
-
-    # Over the threshold: no per-building features, but a density grid instead.
-    data = client.get(url, world).json()
-    assert data["truncated"] is True
-    assert data["features"] == []
-    assert data["density"], "expected a density grid above the threshold"
-
-    # Under the threshold: individual features, no density payload.
-    tiny = client.get(url, {**world, "limit": 1000}).json()
-    assert tiny["truncated"] is False
-    assert tiny.get("density", []) == []
-
-
 def test_map_view_threshold_is_configurable(client):
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
     url = reverse("gwr:map_points")

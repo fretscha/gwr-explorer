@@ -81,25 +81,6 @@ const map = L.map("map").setView(
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
 let layer = L.layerGroup().addTo(map);
 
-// Density heatmap shown when a viewport holds more than the threshold of buildings:
-// the server returns an aggregated grid (lat, lng, count) instead of points.
-let heat = null;
-function clearHeat() {
-  if (heat) {
-    map.removeLayer(heat);
-    heat = null;
-  }
-}
-function renderHeat(density) {
-  clearHeat();
-  if (!density || !density.length) return;
-  const max = density.reduce((m, d) => Math.max(m, d[2]), 0) || 1;
-  heat = L.heatLayer(
-    density.map(([lat, lng, n]) => [lat, lng, n / max]),
-    { radius: 22, blur: 18, minOpacity: 0.3 },
-  ).addTo(map);
-}
-
 // Write the current view + limit back to the URL (without a history entry) so it
 // is always current for the language switcher's `next` value.
 function syncUrl(limit) {
@@ -138,22 +119,15 @@ async function refresh() {
   const fc = await (await fetch(`${pointsUrl}?${q}`)).json();
   layer.clearLayers();
 
-  // Only draw individual objects once fewer than the selected threshold are in
-  // view; above that the server returns truncated with a density grid, which we
-  // render as a heatmap overview instead of the circles.
+  // Only draw objects once fewer than the selected threshold are in view; above
+  // that the server returns truncated with no features and we prompt the user to
+  // zoom in.
   if (fc.truncated) {
-    if (L.heatLayer) {
-      renderHeat(fc.density);
-      hintEl.style.display = "none";
-    } else {
-      // Fallback if the heat plugin failed to load: prompt the user to zoom in.
-      hintEl.textContent = hintTemplate.replaceAll("{n}", limit);
-      hintEl.style.display = "block";
-    }
+    hintEl.textContent = hintTemplate.replaceAll("{n}", limit);
+    hintEl.style.display = "block";
     legendEl.style.display = "none";
     return;
   }
-  clearHeat();
   hintEl.style.display = "none";
   if (fc.features.length) {
     renderLegend();
