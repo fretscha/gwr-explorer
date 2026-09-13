@@ -22,7 +22,9 @@
         </div>
         <form action="{% url 'set_language' %}" method="post" class="flex items-center gap-1">
           {% csrf_token %}
-          <input type="hidden" name="next" value="{{ request.path }}" />
+          {# get_full_path (not just path) so the query string — search term, #}
+          {# explorer filters, map view — is carried to the switched language. #}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}" />
           <button
             type="submit"
             name="language"

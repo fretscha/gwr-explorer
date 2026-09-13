@@ -62,9 +62,36 @@ function circleRadius(gebf) {
   return Math.max(MIN_R, Math.min(MAX_R, R_SCALE * Math.sqrt(gebf)));
 }
 
-const map = L.map("map").setView([46.8, 8.2], 8);
+// Restore the map view and object-limit from the URL query so a full-page reload
+// (e.g. a language switch, which reloads under a new locale prefix) returns to the
+// same place. Falls back to a Switzerland-wide view.
+const urlParams = new URLSearchParams(location.search);
+const initLat = parseFloat(urlParams.get("lat"));
+const initLng = parseFloat(urlParams.get("lng"));
+const initZoom = parseInt(urlParams.get("z"), 10);
+const initLimit = urlParams.get("limit");
+if (limitEl && [...limitEl.options].some((o) => o.value === initLimit)) {
+  limitEl.value = initLimit;
+}
+
+const map = L.map("map").setView(
+  Number.isFinite(initLat) && Number.isFinite(initLng) ? [initLat, initLng] : [46.8, 8.2],
+  Number.isInteger(initZoom) ? initZoom : 8,
+);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
 let layer = L.layerGroup().addTo(map);
+
+// Write the current view + limit back to the URL (without a history entry) so it
+// is always current for the language switcher's `next` value.
+function syncUrl(limit) {
+  const c = map.getCenter();
+  const p = new URLSearchParams(location.search);
+  p.set("lat", c.lat.toFixed(5));
+  p.set("lng", c.lng.toFixed(5));
+  p.set("z", map.getZoom());
+  p.set("limit", limit);
+  history.replaceState(null, "", `?${p}`);
+}
 
 function renderLegend() {
   if (legendEl.dataset.built) return;
@@ -81,6 +108,7 @@ function renderLegend() {
 async function refresh() {
   const b = map.getBounds();
   const limit = currentLimit();
+  syncUrl(limit);
   const q = new URLSearchParams({
     south: b.getSouth(),
     west: b.getWest(),

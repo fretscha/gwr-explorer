@@ -34,7 +34,11 @@ _BUILDING_FIELDS = [
 
 
 def search(request):
-    return render(request, "search.html")
+    # Render initial results server-side from ?q= so a full-page reload (e.g. a
+    # language switch) restores the query and its hits, not just an empty box.
+    q = request.GET.get("q", "")
+    hits = SearchService().search(q) if q else []
+    return render(request, "search.html", {"q": q, "hits": hits})
 
 
 def search_results(request):
@@ -113,6 +117,10 @@ def _facet_params(request):
 
 def explorer(request):
     data = FacetService().query(**_facet_params(request))
+    # Raw string values of the current filters so the form can pre-select them on
+    # a full-page reload (language switch); kept as strings for template equality.
+    g = request.GET
+    data["sel"] = {k: g.get(k, "") for k in ("canton", "gkat", "genh1", "year_from", "year_to")}
     return render(request, "explorer.html", data)
 
 

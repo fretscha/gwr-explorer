@@ -10,32 +10,45 @@
     {% trans "Kanton" %}
     <select name="canton" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
       <option value="">{% trans "alle" %}</option>
-      {% for o in facets.canton %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
+      {% for o in facets.canton %}<option value="{{ o.key }}"{% if o.key|stringformat:"s" == sel.canton %} selected{% endif %}>{{ o.label }} ({{ o.count }})</option>{% endfor %}
     </select>
   </label>
   <label title="GKAT" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
     {% trans "Gebäudekategorie" %}
     <select name="gkat" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
       <option value="">{% trans "alle" %}</option>
-      {% for o in facets.gkat %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
+      {% for o in facets.gkat %}<option value="{{ o.key }}"{% if o.key|stringformat:"s" == sel.gkat %} selected{% endif %}>{{ o.label }} ({{ o.count }})</option>{% endfor %}
     </select>
   </label>
   <label title="GENH1" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
     {% trans "Heizungsart" %}
     <select name="genh1" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500">
       <option value="">{% trans "alle" %}</option>
-      {% for o in facets.genh1 %}<option value="{{ o.key }}">{{ o.label }} ({{ o.count }})</option>{% endfor %}
+      {% for o in facets.genh1 %}<option value="{{ o.key }}"{% if o.key|stringformat:"s" == sel.genh1 %} selected{% endif %}>{{ o.label }} ({{ o.count }})</option>{% endfor %}
     </select>
   </label>
   <label title="GBAUJ" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
     {% trans "Baujahr von" %}
-    <input type="number" name="year_from" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" />
+    <input type="number" name="year_from" value="{{ sel.year_from }}" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" />
   </label>
   <label title="GBAUJ" class="flex flex-col gap-1 text-sm font-medium text-slate-600">
     {% trans "bis" %}
-    <input type="number" name="year_to" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" />
+    <input type="number" name="year_to" value="{{ sel.year_to }}" class="rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500" />
   </label>
 </form>
 
 <div id="ex-results">{% include "partials/explorer_results.html" %}</div>
+<script>
+  // Mirror the active filters into the page URL so they survive a full-page
+  // reload (e.g. a language switch). Empty fields are dropped for a clean URL.
+  const exForm = document.getElementById("ex-filter-form");
+  exForm.addEventListener("change", () => {
+    const p = new URLSearchParams();
+    new FormData(exForm).forEach((v, k) => {
+      if (v !== "") p.set(k, v);
+    });
+    const qs = p.toString();
+    history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+  });
+</script>
 {% endblock %}

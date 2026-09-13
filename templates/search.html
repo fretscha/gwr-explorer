@@ -4,11 +4,21 @@
 <div class="mx-auto max-w-2xl">
   <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
     <h1 class="mb-4 text-2xl font-semibold text-slate-900">{% trans "GWR-Suche" %}</h1>
-    <input type="search" name="q" placeholder="{% trans 'Adresse, Gemeinde oder EGID' %}"
+    <input type="search" id="q" name="q" value="{{ q }}" placeholder="{% trans 'Adresse, Gemeinde oder EGID' %}"
            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm
                   focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
            hx-get="{% url 'gwr:search_results' %}" hx-target="#results" hx-trigger="keyup changed delay:300ms" />
-    <div id="results" class="mt-4"></div>
+    {# Rendered inline when ?q= is present so a reload restores the results. #}
+    <div id="results" class="mt-4">{% if q %}{% include "partials/search_results.html" %}{% endif %}</div>
   </div>
 </div>
+<script>
+  // Mirror the query into the page URL so it survives a full-page reload (e.g. a
+  // language switch, which reloads the page under a new locale prefix).
+  const searchBox = document.getElementById("q");
+  searchBox.addEventListener("input", () => {
+    const v = searchBox.value.trim();
+    history.replaceState(null, "", v ? `?q=${encodeURIComponent(v)}` : location.pathname);
+  });
+</script>
 {% endblock %}
