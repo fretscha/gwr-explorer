@@ -3,7 +3,7 @@ from django.contrib.gis.geos import Point
 from django.core.management import call_command
 from django.urls import reverse
 
-from src.models import Building, Entrance
+from gwr.models import Building, Entrance
 from tests.make_csv_fixture import SAMPLE_ZIP
 
 pytestmark = pytest.mark.django_db(transaction=True)

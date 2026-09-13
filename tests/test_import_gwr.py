@@ -8,7 +8,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 def test_import_loads_typed_rows_and_geometry():
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.models import Building, Code, Dwelling, Entrance
+    from gwr.models import Building, Code, Dwelling, Entrance
 
     assert Building.objects.count() == 500
     assert Entrance.objects.filter(EGID=1).exists()
@@ -24,6 +24,6 @@ def test_import_loads_typed_rows_and_geometry():
 def test_import_is_idempotent():
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.models import Building
+    from gwr.models import Building
 
     assert Building.objects.count() == 500  # not doubled

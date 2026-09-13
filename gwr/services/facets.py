@@ -1,7 +1,7 @@
 from django.db.models import Count
 
-from src.models import Building
-from src.services.labels import LabelService
+from gwr.models import Building
+from gwr.services.labels import LabelService
 
 
 class FacetService:

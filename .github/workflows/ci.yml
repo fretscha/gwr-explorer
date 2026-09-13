@@ -49,7 +49,7 @@ jobs:
         run: uv sync --frozen
 
       - name: Ruff
-        run: uv run ruff check src tests config
+        run: uv run ruff check gwr tests config
 
       - name: Tests
         run: uv run pytest -q

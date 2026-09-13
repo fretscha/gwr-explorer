@@ -2,11 +2,11 @@ from django.http import Http404
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
-from src.models import Building, Dwelling, Entrance
-from src.services.facets import FacetService
-from src.services.labels import LabelService
-from src.services.search import SearchService
-from src.services.stats import StatsService
+from gwr.models import Building, Dwelling, Entrance
+from gwr.services.facets import FacetService
+from gwr.services.labels import LabelService
+from gwr.services.search import SearchService
+from gwr.services.stats import StatsService
 
 _DASHBOARD_METRICS = [
     ("buildings_by_canton", _("Gebäude pro Kanton")),

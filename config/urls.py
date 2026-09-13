@@ -6,5 +6,5 @@ urlpatterns = [
     # Outside i18n_patterns: the language-switch endpoint itself must be
     # reachable without a locale prefix already resolved.
     path("i18n/setlang/", set_language, name="set_language"),
-    *i18n_patterns(path("", include("src.api.urls")), prefix_default_language=True),
+    *i18n_patterns(path("", include("gwr.api.urls")), prefix_default_language=True),
 ]

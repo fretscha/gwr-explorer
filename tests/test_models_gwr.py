@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.gis.geos import Point
 
-from src.models import Building
+from gwr.models import Building
 
 pytestmark = pytest.mark.django_db
 

@@ -3,7 +3,7 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    dependencies = [("src", "0001_initial")]
+    dependencies = [("gwr", "0001_initial")]
     operations = [
         migrations.AddIndex("entrance", GinIndex(fields=["search_vector"], name="entrance_sv_gin")),
         migrations.RunSQL(

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from src.api import api_views, views
+from gwr.api import api_views, views
 
 app_name = "gwr"
 urlpatterns = [

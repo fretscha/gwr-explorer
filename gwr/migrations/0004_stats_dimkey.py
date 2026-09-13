@@ -64,7 +64,7 @@ CREATE INDEX mv_stats_metric ON mv_stats (metric);
 
 
 class Migration(migrations.Migration):
-    dependencies = [("src", "0003_stats_matview")]
+    dependencies = [("gwr", "0003_stats_matview")]
     operations = [
         migrations.RunSQL(CREATE_MV_STATS_NO_LABEL, RESTORE_MV_STATS_WITH_LABEL),
     ]

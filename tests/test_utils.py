@@ -1,4 +1,4 @@
-from src.utils.field_labels import FIELD_LABELS, field_label
+from gwr.utils.field_labels import FIELD_LABELS, field_label
 
 
 def test_field_label_known():

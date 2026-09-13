@@ -9,7 +9,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 def test_value_and_field_per_language():
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.services.labels import LabelService
+    from gwr.services.labels import LabelService
 
     svc = LabelService()
     activate("de")

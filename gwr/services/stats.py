@@ -1,7 +1,7 @@
 from django.db import connection
 from django.utils.translation import gettext, get_language
 
-from src.services.labels import LabelService
+from gwr.services.labels import LabelService
 
 _CODE_METRIC = {"buildings_by_category": "GKAT", "building_status": "GSTAT", "heating_energy": "GENH1"}
 

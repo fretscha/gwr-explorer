@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 
-from src.services.maps import MapService
-from src.services.stats import StatsService
+from gwr.services.maps import MapService
+from gwr.services.stats import StatsService
 
 
 def stats_json(request, metric: str):

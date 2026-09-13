@@ -1,6 +1,6 @@
 from django.utils.translation import activate
 
-from src.utils.field_labels import FIELD_LABELS, field_label
+from gwr.utils.field_labels import FIELD_LABELS, field_label
 
 
 def test_de_fr_it_field_labels():

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from src.management.commands.import_gwr import Command
+from gwr.management.commands.import_gwr import Command
 
 
 def _opts(**over):

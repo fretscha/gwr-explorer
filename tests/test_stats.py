@@ -9,8 +9,8 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 def test_stats_labels_per_language():
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.models import Building
-    from src.services.stats import StatsService
+    from gwr.models import Building
+    from gwr.services.stats import StatsService
 
     svc = StatsService()
     rows = svc.metric("buildings_by_canton")

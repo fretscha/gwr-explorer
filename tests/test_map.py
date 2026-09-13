@@ -9,7 +9,7 @@ pytestmark = pytest.mark.django_db(transaction=True)
 
 def test_bbox_returns_in_view_and_caps():
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.services.maps import MapService
+    from gwr.services.maps import MapService
 
     # EGID 1 is near 8.449E/47.269N
     fc = MapService().points_in_bbox(47.26, 8.44, 47.28, 8.46, {})
@@ -26,7 +26,7 @@ def test_bbox_returns_in_view_and_caps():
 
 def test_features_carry_heating_method_and_heated_surface():
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
-    from src.services.maps import MapService
+    from gwr.services.maps import MapService
 
     # Each point must expose GENH1 (heating method, for colour) and GEBF
     # (Energiebezugsfläche / heated surface m², for circle size) so the client

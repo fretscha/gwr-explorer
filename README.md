@@ -104,19 +104,19 @@ Two independent things are translated:
   labels such as `GKAT=1020` → "Gebäude mit ausschliesslicher
   Wohnnutzung") — these come from the official GWR spec PDFs, not from
   hand-translated msgids, since the register defines its own DE/FR/IT
-  vocabulary per field and per code. `src/services/labels.py`
-  (`LabelService`) and `src/utils/field_labels.py` resolve both against
+  vocabulary per field and per code. `gwr/services/labels.py`
+  (`LabelService`) and `gwr/utils/field_labels.py` resolve both against
   the currently active language (`django.utils.translation.get_language()`),
   so any view or template that calls `LabelService().field(...)` /
   `.value(...)` or `field_label(...)` automatically renders in whichever
   locale the request is in — including the `mv_stats` statistics dashboards,
   which store the raw coded `dim_key` and resolve its display label
-  per-language at read time (`src/services/stats.py`), rather than baking a
+  per-language at read time (`gwr/services/stats.py`), rather than baking a
   language into the materialized view.
 
 ### Regenerating field labels
 
-`src/utils/field_labels.py` (`FIELD_LABELS`, used by `field_label()`) is
+`gwr/utils/field_labels.py` (`FIELD_LABELS`, used by `field_label()`) is
 **generated**, not hand-written — it's parsed out of the official GWR field
 specification PDFs, which are not committed to this repo (see `ch/` in
 `.gitignore`). To regenerate it:
@@ -134,7 +134,7 @@ uv run python scripts/gen_field_labels.py
 Chrome strings (`{% trans %}`/`{% blocktrans %}` in templates, `gettext()`
 in Python) go through the normal Django message catalogs in `locale/`.
 Run these **from the project root**, not from inside `.venv`, so the scan
-is scoped to this project's source (templates/, `src/`) and catalogs
+is scoped to this project's source (templates/, `gwr/`) and catalogs
 (`locale/`) rather than also walking every installed package's own
 `locale/` directory under `.venv`:
 

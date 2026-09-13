@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "django.contrib.gis",
     "django.contrib.sessions",
-    "src",
+    "gwr",
 ]
 
 # Order matters: SessionMiddleware must run before LocaleMiddleware (set_language

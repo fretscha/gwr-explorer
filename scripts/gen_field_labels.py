@@ -1,4 +1,4 @@
-"""Generate src/utils/field_labels.py (DE/FR/IT) from ch/*_specifications.pdf.
+"""Generate gwr/utils/field_labels.py (DE/FR/IT) from ch/*_specifications.pdf.
 
 Run: uv run python scripts/gen_field_labels.py
 
@@ -26,7 +26,7 @@ SPECS = [
     "ch/eingang-entree-entrata_specifications.pdf",
     "ch/wohnung-logement-abitazione_specifications.pdf",
 ]
-OUT = Path("src/utils/field_labels.py")
+OUT = Path("gwr/utils/field_labels.py")
 
 NR_TOKENS = {"Nr.", "N°", "No."}
 SPEZ_TOKENS = {"Spez.", "Spec."}

@@ -36,7 +36,7 @@ DROP_MV_STATS = "DROP MATERIALIZED VIEW IF EXISTS mv_stats;"
 
 
 class Migration(migrations.Migration):
-    dependencies = [("src", "0002_search_indexes")]
+    dependencies = [("gwr", "0002_search_indexes")]
     operations = [
         migrations.RunSQL(CREATE_MV_STATS, DROP_MV_STATS),
     ]

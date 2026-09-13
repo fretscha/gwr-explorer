@@ -2,8 +2,8 @@ import logging
 
 from django.utils.translation import get_language
 
-from src.models import Code
-from src.utils.field_labels import field_label
+from gwr.models import Code
+from gwr.utils.field_labels import field_label
 
 logger = logging.getLogger(__name__)
 
