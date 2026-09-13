@@ -20,6 +20,11 @@ services:
       PGPASSWORD: gwr
       PGDATABASE: gwr
       DJANGO_DEBUG: "1"
+      # Cache the downloaded ch.zip on the host (bind mount below) so it survives
+      # container rebuilds and lives on the host disk, not the smaller Docker VM disk.
+      GWR_ZIP_PATH: /app/data/ch.zip
+    volumes:
+      - ../data:/app/data
     depends_on:
       - db
     ports:
