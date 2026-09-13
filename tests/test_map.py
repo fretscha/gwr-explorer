@@ -42,14 +42,33 @@ def test_map_view_hides_points_at_or_above_threshold(client):
     call_command("import_gwr", "--file", str(SAMPLE_ZIP))
     url = reverse("gwr:map_points")
 
-    # The map only draws objects when fewer than 100 are in view: a world-spanning
-    # bbox covers all 500 sample buildings, so the view reports truncated and
-    # ships no features (the client shows a "zoom in" hint instead).
-    resp = client.get(url, {"south": -90, "west": -180, "north": 90, "east": 180})
+    # The map only draws objects when fewer than the selected threshold are in
+    # view. Default is 250: a world-spanning bbox covers all 500 sample buildings,
+    # so the view reports truncated and ships no features (the client shows a
+    # "zoom in" hint instead).
+    world = {"south": -90, "west": -180, "north": 90, "east": 180}
+    resp = client.get(url, world)
     assert resp.status_code == 200
     data = resp.json()
     assert data["truncated"] is True
     assert data["features"] == []
+
+
+def test_map_view_threshold_is_configurable(client):
+    call_command("import_gwr", "--file", str(SAMPLE_ZIP))
+    url = reverse("gwr:map_points")
+    world = {"south": -90, "west": -180, "north": 90, "east": 180}
+
+    # Raising the threshold above the sample size (500) draws every point.
+    resp = client.get(url, {**world, "limit": 1000})
+    data = resp.json()
+    assert data["truncated"] is False
+    assert data["features"], "expected points below the 1000 threshold"
+
+    # An unsupported value falls back to the 250 default (not honoured verbatim),
+    # so a huge bbox is still truncated.
+    resp = client.get(url, {**world, "limit": 999999})
+    assert resp.json()["truncated"] is True
 
 
 def test_map_points_bad_bbox_params_return_400(client):

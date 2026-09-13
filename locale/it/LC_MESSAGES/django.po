@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GWR Explorer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-11 09:47-0500\n"
+"POT-Creation-Date: 2026-09-13 03:19-0500\n"
 "PO-Revision-Date: 2026-09-11 00:00+0100\n"
 "Last-Translator: GWR Explorer team\n"
 "Language-Team: Italian\n"
@@ -155,53 +155,58 @@ msgstr "Anno di costruzione da"
 msgid "bis"
 msgstr "a"
 
-#: templates/map.html:14
+#: templates/map.html:10
+msgid "Max. Objekte"
+msgstr "Oggetti max."
+
+#: templates/map.html:22
 msgid "Wärmepumpe / Umweltwärme"
 msgstr "Pompa di calore / calore ambientale"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Gas"
 msgstr "Gas"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Heizöl"
 msgstr "Olio da riscaldamento"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Holz"
 msgstr "Legna"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Abwärme"
 msgstr "Scarichi termici"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Elektrizität"
 msgstr "Elettricità"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Sonne (thermisch)"
 msgstr "Sole (termico)"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Fernwärme"
 msgstr "Calore a distanza"
 
-#: templates/map.html:14
+#: templates/map.html:22
 msgid "Keine / Andere"
 msgstr "Nessuna / Altro"
 
-#: templates/map.html:15
+#: templates/map.html:23
 msgid "Beheizte Fläche"
 msgstr "Superficie riscaldata"
 
-#: templates/map.html:22
+#: templates/map.html:25
+#, python-brace-format
 msgid ""
-"Zu viele Objekte (100 oder mehr) — zoomen Sie hinein, bis weniger als 100 "
+"Zu viele Objekte ({n} oder mehr) — zoomen Sie hinein, bis weniger als {n} "
 "angezeigt werden."
 msgstr ""
-"Troppi oggetti (100 o più) — ingrandisci finché ne vengono mostrati meno di "
-"100."
+"Troppi oggetti ({n} o più) — ingrandisci finché ne vengono mostrati meno di "
+"{n}."
 
 #: templates/partials/explorer_results.html:2
 #, python-format

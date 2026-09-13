@@ -14,11 +14,14 @@ def _int_param(request, name):
     return int(v) if v and v.isdigit() else None
 
 
-# The map only draws objects once the viewport holds fewer than 100 of them; the
-# user zooms in until at most this many remain. cap=99 means a 100th match trips
+# The map only draws objects once the viewport holds fewer than the selected
+# threshold; the user zooms in until that many remain. The threshold is picked
+# from a fixed whitelist (the UI offers exactly these) so a crafted ?limit= can't
+# demand an unbounded result set. cap = limit - 1 means the limit-th match trips
 # `truncated`, and we ship no features so the client shows a "zoom in" hint rather
 # than a dense, unreadable blob.
-MAP_POINT_LIMIT = 99
+MAP_POINT_LIMITS = (250, 500, 1000)
+DEFAULT_MAP_POINT_LIMIT = 250
 
 
 def map_points(request):
@@ -29,6 +32,9 @@ def map_points(request):
         south, west, north, east = (float(g["south"]), float(g["west"]), float(g["north"]), float(g["east"]))
     except (KeyError, ValueError):
         return JsonResponse({"error": "Ungültige oder fehlende bbox-Parameter (south/west/north/east)"}, status=400)
+    limit = _int_param(request, "limit")
+    if limit not in MAP_POINT_LIMITS:
+        limit = DEFAULT_MAP_POINT_LIMIT
     fc = MapService().points_in_bbox(
         south,
         west,
@@ -39,10 +45,10 @@ def map_points(request):
             "gkat": _int_param(request, "gkat"),
             "genh1": _int_param(request, "genh1"),
         },
-        cap=MAP_POINT_LIMIT,
+        cap=limit - 1,
     )
-    # Above the threshold the client renders nothing, so don't ship points it will
-    # only discard.
+    # At or above the threshold the client renders nothing, so don't ship points it
+    # will only discard.
     if fc["truncated"]:
         fc["features"] = []
     return JsonResponse(fc)

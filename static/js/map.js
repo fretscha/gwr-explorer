@@ -11,6 +11,16 @@ const surfaceLabel = mapEl.dataset.surfaceLabel;
 
 const hintEl = document.getElementById("map-hint");
 const legendEl = document.getElementById("map-legend");
+const limitEl = document.getElementById("map-limit");
+// Hint text carries an {n} placeholder so the message can name the active
+// threshold (e.g. "…250 oder mehr…") in the current language.
+const hintTemplate = mapEl.dataset.hintTemplate;
+
+// Max objects to show before the map hides everything and asks the user to zoom
+// in. Bound to the <select>; falls back to 250 if the control is absent.
+function currentLimit() {
+  return (limitEl && parseInt(limitEl.value, 10)) || 250;
+}
 
 function buildingUrl(egid) {
   return buildingUrlTemplate.replace(/0\/$/, `${egid}/`);
@@ -70,13 +80,22 @@ function renderLegend() {
 
 async function refresh() {
   const b = map.getBounds();
-  const q = new URLSearchParams({ south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast() });
+  const limit = currentLimit();
+  const q = new URLSearchParams({
+    south: b.getSouth(),
+    west: b.getWest(),
+    north: b.getNorth(),
+    east: b.getEast(),
+    limit,
+  });
   const fc = await (await fetch(`${pointsUrl}?${q}`)).json();
   layer.clearLayers();
 
-  // Only draw objects once fewer than 100 are in view; above that the server
-  // returns truncated with no features and we prompt the user to zoom in.
+  // Only draw objects once fewer than the selected threshold are in view; above
+  // that the server returns truncated with no features and we prompt the user to
+  // zoom in.
   if (fc.truncated) {
+    hintEl.textContent = hintTemplate.replaceAll("{n}", limit);
     hintEl.style.display = "block";
     legendEl.style.display = "none";
     return;
@@ -111,4 +130,5 @@ async function refresh() {
   });
 }
 map.on("moveend", refresh);
+if (limitEl) limitEl.addEventListener("change", refresh);
 refresh();
