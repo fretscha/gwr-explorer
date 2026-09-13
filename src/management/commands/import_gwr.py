@@ -8,14 +8,16 @@ the way. Staging tables are dropped at the end. Re-running replaces all data
 (truncate + reload), so the command is idempotent.
 
 The ~1.7 GB ch.zip is downloaded to a persistent cache (settings.GWR_ZIP_PATH)
-only when it is missing or --download forces a refresh, so repeated imports do
-not re-fetch it.
+only when it is missing or --force-download forces a refresh, so repeated imports
+do not re-fetch it.
 """
 
 import io
 import urllib.request
 import zipfile
 from pathlib import Path
+
+from tqdm import tqdm
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -78,8 +80,9 @@ class Command(BaseCommand):
             self._transform()
         # Outside the atomic block: refresh mv_stats only after the import
         # transaction has committed, so the view reflects the newly loaded data.
-        with connection.cursor() as cur:
+        with connection.cursor() as cur, tqdm(desc="Refresh stats", total=1, disable=None) as bar:
             cur.execute("REFRESH MATERIALIZED VIEW mv_stats")
+            bar.update(1)
         self.stdout.write(self.style.SUCCESS("import_gwr complete"))
 
     def _obtain(self, opts):
@@ -100,7 +103,19 @@ class Command(BaseCommand):
         cache.parent.mkdir(parents=True, exist_ok=True)
         part = cache.with_name(cache.name + ".part")
         self.stdout.write(f"Downloading {url} -> {cache} ...")
-        urllib.request.urlretrieve(url, part)  # noqa: S310 (trusted BFS URL)
+        # tqdm(disable=None) auto-silences when stderr isn't a TTY (tests, CI, logs).
+        with tqdm(unit="B", unit_scale=True, unit_divisor=1024, desc="ch.zip", disable=None) as bar:
+            seen = 0
+
+            def hook(count, block_size, total):
+                nonlocal seen
+                if total > 0:
+                    bar.total = total
+                downloaded = count * block_size
+                bar.update(downloaded - seen)
+                seen = downloaded
+
+            urllib.request.urlretrieve(url, part, reporthook=hook)  # noqa: S310 (trusted BFS URL)
         part.replace(cache)
 
     def _load(self, zf, csv_name, staging, cols, limit):
@@ -114,10 +129,20 @@ class Command(BaseCommand):
                 f"COPY {staging} ({collist}) FROM STDIN "
                 "WITH (FORMAT csv, DELIMITER E'\\t', HEADER true, NULL '')"
             )
-            with zf.open(csv_name) as fh, cur.copy(copy_sql) as copy:
+            # Progress is measured against the uncompressed CSV size in the zip.
+            total = zf.getinfo(csv_name).file_size
+            with (
+                zf.open(csv_name) as fh,
+                cur.copy(copy_sql) as copy,
+                tqdm(
+                    total=total, unit="B", unit_scale=True, unit_divisor=1024,
+                    desc=f"COPY {staging}", disable=None,
+                ) as bar,
+            ):
                 if limit is None:
                     for chunk in iter(lambda: fh.read(1 << 20), b""):
                         copy.write(chunk)
+                        bar.update(len(chunk))
                 else:
                     self._copy_limited(fh, copy, limit)
 
@@ -131,55 +156,61 @@ class Command(BaseCommand):
             copy.write(line.encode("utf-8"))
 
     def _transform(self):
-        """Cast staging text -> typed model tables; build geometry + address_label."""
+        """Cast staging text -> typed model tables; build geometry + address_label.
+
+        Each step is a single big INSERT/UPDATE with no incremental feedback of its
+        own, so progress is shown at the granularity of the steps themselves.
+        """
+        code_sql = (
+            'INSERT INTO code ("CECODID","CMERKM","CODTXTLD","CODTXTLF","CODTXTLI") '
+            f'SELECT {_n("CECODID")}::int, "CMERKM", "CODTXTLD", "CODTXTLF", "CODTXTLI" '
+            "FROM stg_code"
+        )
+        building_sql = (
+            'INSERT INTO building ("EGID","GDEKT","GGDENR","GGDENAME","GKODE","GKODN",'
+            '"GSTAT","GKAT","GKLAS","GBAUJ","GBAUP","GAREA","GEBF","GVOL","GASTW","GANZWHG",'
+            '"GENH1","GENH2", geom) '
+            f'SELECT {_n("EGID")}::int, "GDEKT", {_n("GGDENR")}::int, "GGDENAME", '
+            f'{_n("GKODE")}::float8, {_n("GKODN")}::float8, '
+            f'{_n("GSTAT")}::int, {_n("GKAT")}::int, {_n("GKLAS")}::int, {_n("GBAUJ")}::int, '
+            f'{_n("GBAUP")}::int, {_n("GAREA")}::int, {_n("GEBF")}::int, {_n("GVOL")}::int, {_n("GASTW")}::int, '
+            f'{_n("GANZWHG")}::int, {_n("GENH1")}::int, {_n("GENH2")}::int, '
+            f'CASE WHEN {_n("GKODE")} IS NOT NULL AND {_n("GKODN")} IS NOT NULL '
+            f'THEN ST_SetSRID(ST_MakePoint({_n("GKODE")}::float8, {_n("GKODN")}::float8), 2056) END '
+            "FROM stg_building"
+        )
+        # entrance (+ geom, address_label) -- keep ALL rows (bilingual duplicates)
+        entrance_sql = (
+            'INSERT INTO entrance ("EGID","EDID","STRNAME","STRSP","STROFFIZIEL","DEINR",'
+            '"DPLZ4","DPLZNAME","DKODE","DKODN", address_label, geom) '
+            f'SELECT {_n("EGID")}::int, {_n("EDID")}::int, "STRNAME", {_n("STRSP")}::int, '
+            f'{_n("STROFFIZIEL")}::int, "DEINR", {_n("DPLZ4")}::int, "DPLZNAME", '
+            f'{_n("DKODE")}::float8, {_n("DKODN")}::float8, '
+            "concat_ws(' ', \"STRNAME\", \"DEINR\", \"DPLZ4\", \"DPLZNAME\"), "
+            f'CASE WHEN {_n("DKODE")} IS NOT NULL AND {_n("DKODN")} IS NOT NULL '
+            f'THEN ST_SetSRID(ST_MakePoint({_n("DKODE")}::float8, {_n("DKODN")}::float8), 2056) END '
+            "FROM stg_entrance"
+        )
+        dwelling_sql = (
+            'INSERT INTO dwelling ("EGID","EWID","EDID","WSTWK","WBEZ","WSTAT","WAREA",'
+            '"WAZIM","WKCHE","WBAUJ") '
+            f'SELECT {_n("EGID")}::int, {_n("EWID")}::int, {_n("EDID")}::int, {_n("WSTWK")}::int, '
+            f'"WBEZ", {_n("WSTAT")}::int, {_n("WAREA")}::int, {_n("WAZIM")}::int, '
+            f'{_n("WKCHE")}::int, {_n("WBAUJ")}::int '
+            "FROM stg_dwelling"
+        )
+        steps = [
+            ("truncate tables", "TRUNCATE building, entrance, dwelling, code RESTART IDENTITY CASCADE"),
+            ("codes", code_sql),
+            ("buildings", building_sql),
+            ("entrances", entrance_sql),
+            ("address index", "UPDATE entrance SET search_vector = to_tsvector('simple', coalesce(address_label,''))"),
+            ("dwellings", dwelling_sql),
+        ]
         with connection.cursor() as cur:
-            cur.execute("TRUNCATE building, entrance, dwelling, code RESTART IDENTITY CASCADE")
-
-            # code
-            cur.execute(
-                'INSERT INTO code ("CECODID","CMERKM","CODTXTLD","CODTXTLF","CODTXTLI") '
-                f'SELECT {_n("CECODID")}::int, "CMERKM", "CODTXTLD", "CODTXTLF", "CODTXTLI" '
-                "FROM stg_code"
-            )
-
-            # building (+ geom)
-            cur.execute(
-                'INSERT INTO building ("EGID","GDEKT","GGDENR","GGDENAME","GKODE","GKODN",'
-                '"GSTAT","GKAT","GKLAS","GBAUJ","GBAUP","GAREA","GEBF","GVOL","GASTW","GANZWHG",'
-                '"GENH1","GENH2", geom) '
-                f'SELECT {_n("EGID")}::int, "GDEKT", {_n("GGDENR")}::int, "GGDENAME", '
-                f'{_n("GKODE")}::float8, {_n("GKODN")}::float8, '
-                f'{_n("GSTAT")}::int, {_n("GKAT")}::int, {_n("GKLAS")}::int, {_n("GBAUJ")}::int, '
-                f'{_n("GBAUP")}::int, {_n("GAREA")}::int, {_n("GEBF")}::int, {_n("GVOL")}::int, {_n("GASTW")}::int, '
-                f'{_n("GANZWHG")}::int, {_n("GENH1")}::int, {_n("GENH2")}::int, '
-                f'CASE WHEN {_n("GKODE")} IS NOT NULL AND {_n("GKODN")} IS NOT NULL '
-                f'THEN ST_SetSRID(ST_MakePoint({_n("GKODE")}::float8, {_n("GKODN")}::float8), 2056) END '
-                "FROM stg_building"
-            )
-
-            # entrance (+ geom, address_label) -- keep ALL rows (bilingual duplicates)
-            cur.execute(
-                'INSERT INTO entrance ("EGID","EDID","STRNAME","STRSP","STROFFIZIEL","DEINR",'
-                '"DPLZ4","DPLZNAME","DKODE","DKODN", address_label, geom) '
-                f'SELECT {_n("EGID")}::int, {_n("EDID")}::int, "STRNAME", {_n("STRSP")}::int, '
-                f'{_n("STROFFIZIEL")}::int, "DEINR", {_n("DPLZ4")}::int, "DPLZNAME", '
-                f'{_n("DKODE")}::float8, {_n("DKODN")}::float8, '
-                "concat_ws(' ', \"STRNAME\", \"DEINR\", \"DPLZ4\", \"DPLZNAME\"), "
-                f'CASE WHEN {_n("DKODE")} IS NOT NULL AND {_n("DKODN")} IS NOT NULL '
-                f'THEN ST_SetSRID(ST_MakePoint({_n("DKODE")}::float8, {_n("DKODN")}::float8), 2056) END '
-                "FROM stg_entrance"
-            )
-            cur.execute("UPDATE entrance SET search_vector = to_tsvector('simple', coalesce(address_label,''))")
-
-            # dwelling
-            cur.execute(
-                'INSERT INTO dwelling ("EGID","EWID","EDID","WSTWK","WBEZ","WSTAT","WAREA",'
-                '"WAZIM","WKCHE","WBAUJ") '
-                f'SELECT {_n("EGID")}::int, {_n("EWID")}::int, {_n("EDID")}::int, {_n("WSTWK")}::int, '
-                f'"WBEZ", {_n("WSTAT")}::int, {_n("WAREA")}::int, {_n("WAZIM")}::int, '
-                f'{_n("WKCHE")}::int, {_n("WBAUJ")}::int '
-                "FROM stg_dwelling"
-            )
-
+            bar = tqdm(steps, desc="Transform", unit="step", disable=None)
+            for label, sql in bar:
+                bar.set_postfix_str(label)
+                cur.execute(sql)
             for stg in ("stg_building", "stg_entrance", "stg_dwelling", "stg_code"):
                 cur.execute(f"DROP TABLE IF EXISTS {stg}")

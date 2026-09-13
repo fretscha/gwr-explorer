@@ -28,7 +28,7 @@ def test_reuses_cache_without_downloading(tmp_path, monkeypatch):
 def test_downloads_when_cache_missing(tmp_path, monkeypatch):
     cache = tmp_path / "sub" / "ch.zip"  # parent dir does not exist yet
 
-    def fake_download(url, dest):
+    def fake_download(url, dest, **kwargs):
         Path(dest).write_bytes(b"fresh")
 
     monkeypatch.setattr(urllib.request, "urlretrieve", fake_download)
@@ -42,7 +42,7 @@ def test_downloads_when_cache_missing(tmp_path, monkeypatch):
 def test_force_download_replaces_existing_cache(tmp_path, monkeypatch):
     cache = tmp_path / "ch.zip"
     cache.write_bytes(b"old")
-    monkeypatch.setattr(urllib.request, "urlretrieve", lambda url, dest: Path(dest).write_bytes(b"new"))
+    monkeypatch.setattr(urllib.request, "urlretrieve", lambda url, dest, **kw: Path(dest).write_bytes(b"new"))
 
     Command()._obtain(_opts(cache=str(cache), force_download=True))
 
