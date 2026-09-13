@@ -20,10 +20,17 @@
           <a href="{% url 'gwr:map_page' %}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">{% trans "Karte" %}</a>
           <a href="{% url 'gwr:explorer' %}" class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900">{% trans "Explorer" %}</a>
         </div>
-        <form action="{% url 'set_language' %}" method="post" class="flex items-center gap-1">
+        <form
+          action="{% url 'set_language' %}"
+          method="post"
+          class="flex items-center gap-1"
+          onsubmit="this.next.value = location.pathname + location.search"
+        >
           {% csrf_token %}
-          {# get_full_path (not just path) so the query string — search term, #}
-          {# explorer filters, map view — is carried to the switched language. #}
+          {# next is set to the LIVE URL on submit (not just the server-rendered #}
+          {# get_full_path) so client-side state written via history.replaceState #}
+          {# — map view, search term, explorer filters — is carried to the #}
+          {# switched language. The server value is the no-JS fallback. #}
           <input type="hidden" name="next" value="{{ request.get_full_path }}" />
           <button
             type="submit"
